@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Threat Investigation Center - {{ ip }} - Smart Honeypot IDS</title>
+    <link rel="stylesheet" href="/static/dashboard.css" />
+    <style>
+      .inv-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+      .inv-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .inv-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .inv-table th, .inv-table td {
+        padding: 6px 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .inv-table th {
+        color: #9ca3af;
+        font-weight: 900;
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+      .inv-table td {
+        color: #e5e7eb;
+      }
+      .inv-empty {
+        color: #9ca3af;
+        font-size: 12px;
+        font-style: italic;
+      }
+      .inv-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+      }
+      .inv-status.blocked {
+        background: rgba(248,113,113,0.20);
+        color: #f87171;
+        border: 1px solid rgba(248,113,113,0.40);
+      }
+      .inv-status.clean {
+        background: rgba(52,211,153,0.20);
+        color: #34d399;
+        border: 1px solid rgba(52,211,153,0.40);
+      }
+      .inv-ip-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <main class="main" style="max-width: 1100px; margin: 0 auto; padding: 24px;">
+        <div class="topbar" style="margin-bottom: 20px;">
+          <div>
+            <h1 class="h1">Threat Investigation Center</h1>
+            <div class="muted">Per-IP drill-down for <span class="inv-ip-mono" style="font-weight:900;">{{ ip }}</span></div>
+          </div>
+          <a class="btn" href="/dashboard">Back to dashboard</a>
+        </div>
+
+        <!-- §1 IP Identity Card -->
+        <div class="inv-card">
+          <h3>1. IP Identity</h3>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px;">
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">IP</div>
+              <div class="inv-ip-mono" style="font-weight:900; font-size: 14px;">{{ ip }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Total attempts</div>
+              <div style="color: #e5e7eb; font-weight: 900; font-size: 18px;">{{ summary.total }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Failed</div>
+              <div style="color: #f87171; font-weight: 900; font-size: 18px;">{{ summary.failed }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Success</div>
+              <div style="color: #34d399; font-weight: 900; font-size: 18px;">{{ summary.success_count }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">First seen</div>
+              <div style="color: #e5e7eb; font-size: 12px;">{{ (summary.first_seen or '-')[:19] }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Last seen</div>
+              <div style="color: #e5e7eb; font-size: 12px;">{{ (summary.last_seen or '-')[:19] }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Threat score</div>
+              <div style="color: #fbbf24; font-weight: 900; font-size: 18px;">
+                {% if block_record %}{{ block_record.threat_score }}{% else %}0{% endif %}
+              </div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Block status</div>
+              {% if is_blocked %}
+                <div><span class="inv-status blocked">BLOCKED</span></div>
+                <div style="color: #9ca3af; font-size: 10px; margin-top: 4px;">until {{ (block_record.blocked_until or '-')[:19] }}</div>
+              {% else %}
+                <div><span class="inv-status clean">CLEAN</span></div>
+              {% endif %}
+            </div>
+          </div>
+          {% if block_record %}
+          <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 11px;">
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Lifetime blocks</div>
+              <div style="color: #60a5fa; font-weight: 900;">#{{ block_record.blocked_count }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Failed (snapshot)</div>
+              <div style="color: #fbbf24; font-weight: 900;">{{ block_record.failed_attempts }}</div>
+            </div>
+            <div>
+              <div style="color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">last_seen (suspicious_ips)</div>
+              <div style="color: #e5e7eb;">{{ (block_record.last_seen or '-')[:19] }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- §2 Services Targeted -->
+        <div class="inv-card">
+          <h3>2. Services Targeted</h3>
+          {% if services|length > 0 %}
+            <table class="inv-table">
+              <thead>
+                <tr><th>Service route</th><th>Attempts</th><th>Failed</th></tr>
+              </thead>
+              <tbody>
+                {% for s in services %}
+                  <tr>
+                    <td class="inv-ip-mono">{{ s.service_route }}</td>
+                    <td>{{ s.attempts }}</td>
+                    <td style="color: #f87171;">{{ s.failed }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="inv-empty">No services targeted by this IP.</div>
+          {% endif %}
+        </div>
+
+        <!-- §3 Usernames Targeted -->
+        <div class="inv-card">
+          <h3>3. Usernames Targeted</h3>
+          {% if usernames|length > 0 %}
+            <table class="inv-table">
+              <thead>
+                <tr><th>Username</th><th>Attempts</th><th>Failed</th></tr>
+              </thead>
+              <tbody>
+                {% for u in usernames %}
+                  <tr>
+                    <td class="inv-ip-mono">{{ u.username }}</td>
+                    <td>{{ u.attempts }}</td>
+                    <td style="color: #f87171;">{{ u.failed }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="inv-empty">No usernames targeted by this IP.</div>
+          {% endif %}
+        </div>
+
+        <!-- §4 Failure Reasons -->
+        <div class="inv-card">
+          <h3>4. Failure Reasons</h3>
+          {% if reasons|length > 0 %}
+            <table class="inv-table">
+              <thead>
+                <tr><th>Reason</th><th>Count</th></tr>
+              </thead>
+              <tbody>
+                {% for r in reasons %}
+                  <tr>
+                    <td class="inv-ip-mono" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td style="color: #f87171; font-weight: 900;">{{ r.n }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="inv-empty">No failure reasons recorded for this IP.</div>
+          {% endif %}
+        </div>
+
+        <!-- §5 Threat Alerts -->
+        <div class="inv-card">
+          <h3>5. Threat Alerts Generated</h3>
+          {% if alerts|length > 0 %}
+            <table class="inv-table">
+              <thead>
+                <tr><th>Time</th><th>Type</th><th>Severity</th><th>Details</th></tr>
+              </thead>
+              <tbody>
+                {% for a in alerts %}
+                  <tr>
+                    <td>{{ (a.created_at or '-')[:19] }}</td>
+                    <td class="inv-ip-mono">{{ a.alert_type }}</td>
+                    <td>
+                      <span style="color: {% if a.severity >= 4 %}#f87171{% elif a.severity == 3 %}#fbbf24{% else %}#60a5fa{% endif %}; font-weight: 900;">
+                        {{ a.severity }}
+                      </span>
+                    </td>
+                    <td title="{{ a.details or '' }}" style="max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      {{ (a.details or '-')[:80] }}{% if a.details and a.details|length > 80 %}…{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="inv-empty">No threat alerts for this IP.</div>
+          {% endif %}
+        </div>
+
+        <!-- §6 Recent Activity Timeline -->
+        <div class="inv-card">
+          <h3>6. Recent Activity Timeline (last {{ activity|length }})</h3>
+          {% if activity|length > 0 %}
+            <table class="inv-table">
+              <thead>
+                <tr><th>Time</th><th>User</th><th>Service</th><th>Status</th><th>Reason</th></tr>
+              </thead>
+              <tbody>
+                {% for r in activity %}
+                  <tr>
+                    <td>{{ (r.created_at or '-')[:19] }}</td>
+                    <td class="inv-ip-mono">{{ r.username }}</td>
+                    <td class="inv-ip-mono">{{ r.service_route or '-' }}</td>
+                    <td>
+                      {% if r.success == 1 %}
+                        <span style="color: #34d399; font-weight: 900;">SUCCESS</span>
+                      {% else %}
+                        <span style="color: #f87171; font-weight: 900;">FAILED</span>
+                      {% endif %}
+                    </td>
+                    <td title="{{ r.failure_reason or '' }}" style="max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      {{ r.failure_reason or '-' }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="inv-empty">No recent activity for this IP.</div>
+          {% endif %}
+        </div>
+
+        <div class="footer" style="margin-top: 24px;">
+          Generated {{ generated_at }} | Smart Honeypot IDS
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

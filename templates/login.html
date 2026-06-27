@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enterprise Secure Access Portal</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <main class="page">
+      <div class="shell">
+        <header class="brand">
+          <div class="logo" aria-hidden="true">
+            <span class="shield">🛡️</span>
+          </div>
+          <div>
+            <h1 class="title">Enterprise Secure Access Portal</h1>
+            <p class="subtitle">Internal Infrastructure Management System</p>
+          </div>
+        </header>
+
+        <section class="statusbar" aria-live="polite">
+          <div class="status-left">
+            <div class="status-label">System Status</div>
+            <div class="status-pill">
+              <span class="dot ok" aria-hidden="true"></span>
+              <span>Monitoring Active</span>
+            </div>
+          </div>
+
+          <div class="status-right">
+            <div class="status-label">Last Login</div>
+            <div class="status-value" id="last-login">—</div>
+          </div>
+        </section>
+
+        {% if message %}
+        <section class="banner" role="status">
+          {% if message == 'Login Successful' %}
+            <div class="banner ok">Access Granted</div>
+          {% elif message == 'Invalid Credentials' %}
+            <div class="banner danger">Invalid Credentials</div>
+          {% else %}
+            <div class="banner warn">{{ message }}</div>
+          {% endif %}
+        </section>
+        {% endif %}
+
+        <div class="card" role="region" aria-label="Admin login">
+          <div class="card-head">
+            <div class="card-title">Authorized Personnel Only</div>
+            <div class="card-subtitle">Use your credentials to access the honeypot monitoring console.</div>
+          </div>
+
+          <form class="terminal-form" method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label class="field">
+              <span class="label">Username</span>
+              <input
+                type="text"
+                name="username"
+                autocomplete="username"
+                required
+                placeholder="sys_admin"
+              />
+            </label>
+
+            <label class="field">
+              <span class="label">Password</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+                placeholder="CoreAccess@2026"
+              />
+            </label>
+
+            <div class="actions">
+              <button type="submit" class="btn">
+                <span class="btn-glow" aria-hidden="true"></span>
+                Login
+              </button>
+            </div>
+
+            <div class="hint">
+              <span class="hint-icon" aria-hidden="true">🔒</span>
+              <span>Credentials are validated using salted SHA-256 hashing.</span>
+            </div>
+
+            <div class="nav-row">
+              <span class="muted">Admin Dashboard (placeholder)</span>
+              <span class="muted">→ Use /dashboard after login</span>
+            </div>
+          </form>
+        </div>
+
+        <footer class="footer">
+          <div class="footer-row">
+            <span class="footer-pill">AI + IDS Ready</span>
+            <span class="footer-muted">Flask • SQLite • Scikit-learn</span>
+          </div>
+          <div class="footer-note">Built for secure monitoring demos and training.</div>
+        </footer>
+      </div>
+    </main>
+
+    <script>
+      // Beginner-friendly placeholder: last login UI demo.
+      // The backend can be extended later without changing the UI layout.
+      (function () {
+        const el = document.getElementById('last-login');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleString();
+      })();
+    </script>
+  </body>
+</html>
+

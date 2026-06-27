@@ -1,0 +1,14 @@
+/* Additional UI bits for multi-service honeypot portals */
+
+/* Terminal-ish accents */
+.t-console {
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 16px;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+}
+
+/* Tiny monospace badges */
+.badge-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+

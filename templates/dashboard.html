@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cybersecurity Monitoring Dashboard - Smart Honeypot IDS</title>
+    <link rel="stylesheet" href="/static/dashboard.css" />
+  </head>
+
+  <body>
+    <div class="page">
+      <!-- Sidebar navigation -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <div>
+            <div class="brand-title">Smart Honeypot IDS</div>
+            <div class="brand-sub">Security Monitoring</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Dashboard navigation">
+          <a class="active" href="/dashboard">
+            <span>Dashboard</span>
+            <span aria-hidden="true">›</span>
+          </a>
+          <a href="/">
+            <span>Admin Login</span>
+            <span aria-hidden="true">›</span>
+          </a>
+        </nav>
+
+        <div class="footer" style="margin-top: 18px;">
+          <div><strong>Threat Level:</strong></div>
+          <div style="margin-top: 4px; font-weight: 900; letter-spacing: 0.5px;">
+            {% if ai_threat_level == 'Critical' %}
+              <span style="color: #f87171;">🔴 CRITICAL</span>
+            {% elif ai_threat_level == 'High' %}
+              <span style="color: #fbbf24;">🟠 HIGH</span>
+            {% elif ai_threat_level == 'Medium' %}
+              <span style="color: #60a5fa;">🔵 MEDIUM</span>
+            {% else %}
+              <span style="color: #34d399;">🟢 LOW</span>
+            {% endif %}
+          </div>
+          <div style="margin-top: 8px; color: #9ca3af; font-size: 11px;">
+            Updated every 30 seconds
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="main">
+        <!-- Header -->
+        <div class="topbar">
+          <div>
+            <h1 class="h1">Cybersecurity Monitoring Dashboard</h1>
+            <div class="muted">Real-time intrusion detection & AI-powered threat analysis</div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div class="muted" style="font-weight:600;">Signed in as: {{ username }}</div>
+            <a class="btn" href="/logout">Logout</a>
+          </div>
+
+        </div>
+
+        <!-- Key metrics cards -->
+        <section class="cards" aria-label="Key security metrics">
+          <!-- Total Login Attempts -->
+          <div class="card">
+            <div class="card-label">Total Login Attempts</div>
+            <div class="card-value">{{ total_attempts }}</div>
+            <div class="indicator ok" style="margin-top: 10px;">
+              <span class="light" aria-hidden="true"></span>
+              <span>Monitored</span>
+            </div>
+          </div>
+
+          <!-- Failed Logins -->
+          <div class="card">
+            <div class="card-label">Failed Login Attempts</div>
+            <div class="card-value">{{ failed_logins }}</div>
+            {% if failed_logins >= 10 %}
+              <div class="indicator danger" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>High activity</span>
+              </div>
+            {% elif failed_logins >= 5 %}
+              <div class="indicator warn" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Elevated</span>
+              </div>
+            {% else %}
+              <div class="indicator ok" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Normal</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Threat Alerts -->
+          <div class="card">
+            <div class="card-label">Threat Alerts Generated</div>
+            <div class="card-value">{{ threat_alerts }}</div>
+            {% if threat_alerts >= 5 %}
+              <div class="indicator danger" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Active threats</span>
+              </div>
+            {% elif threat_alerts >= 2 %}
+              <div class="indicator warn" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Monitor closely</span>
+              </div>
+            {% else %}
+              <div class="indicator ok" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Secure</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Suspicious IPs -->
+          <div class="card">
+            <div class="card-label">Suspicious IP Addresses</div>
+            <div class="card-value">{{ suspicious_ips }}</div>
+            {% if suspicious_ips >= 3 %}
+              <div class="indicator danger" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Pattern detected</span>
+              </div>
+            {% elif suspicious_ips > 0 %}
+              <div class="indicator warn" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Tracking</span>
+              </div>
+            {% else %}
+              <div class="indicator ok" style="margin-top: 10px;">
+                <span class="light" aria-hidden="true"></span>
+                <span>Clean</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- AI Threat Prediction -->
+          <div class="card">
+            <div class="card-label">AI Threat Assessment</div>
+            <div class="card-value" style="font-size: 20px;">
+              {% if ai_threat_level == 'Critical' %}
+                <span style="color: #f87171;">🔴</span> CRITICAL
+              {% elif ai_threat_level == 'High' %}
+                <span style="color: #fbbf24;">🟠</span> HIGH
+              {% elif ai_threat_level == 'Medium' %}
+                <span style="color: #60a5fa;">🔵</span> MEDIUM
+              {% else %}
+                <span style="color: #34d399;">🟢</span> LOW
+              {% endif %}
+            </div>
+            <div style="margin-top: 10px; color: #9ca3af; font-size: 11px;">
+              ML-based assessment
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed analysis grid -->
+        <section class="grid" aria-label="Detailed security analysis">
+          <!-- Recent activity logs -->
+          <section class="panel">
+            <div class="panel-title">Recent Attack Activity (Last 25)</div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Username</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>Threat Level</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in recent_attacks %}
+                    <tr>
+                      <td style="font-size: 12px; color: #9ca3af;">
+                        {{ row.timestamp[-19:] if row.timestamp|length > 19 else row.timestamp }}
+                      </td>
+                      <td>{{ row.username }}</td>
+                      <td style="font-family: monospace; font-size: 12px;"><a href="/dashboard/ip/{{ row.ip|urlencode }}" style="color: #93c5fd; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ row.ip }}</a></td>
+                      <td>
+                        <span class="pill {{ 'pill-success' if row.login_status == 'SUCCESS' else 'pill-danger' }}">
+                          {{ row.login_status }}
+                        </span>
+                      </td>
+                      <td>
+                        {% set tl = row.threat_level %}
+                        <span class="pill
+                          {{ 'pill-success' if tl == 'Safe' else ('pill-warn' if tl == 'Suspicious' else 'pill-danger') }}">
+                          {{ row.threat_level }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+
+                  {% if recent_attacks|length == 0 %}
+                    <tr>
+                      <td colspan="5" class="empty">No activity recorded yet.</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Right panel: Statistics and top attackers -->
+          <section class="panel">
+            <div class="panel-title">Threat Distribution & Top Attackers</div>
+
+            <!-- Phase 6 Task 1: Blocked IP Management -->
+            <div id="blocked-ips" style="margin-bottom: 16px; padding: 10px; background: rgba(248,113,113,0.10); border-radius: 12px; border: 1px solid rgba(248,113,113,0.25);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                <div style="color: #f87171; font-size: 11px; font-weight: 900;">🚫 BLOCKED IP MANAGEMENT</div>
+                <div style="color: #9ca3af; font-size: 11px;">
+                  Active blocks: <span style="color: #f87171; font-weight: 900;">{{ blocked_ip_count }}</span>
+                </div>
+              </div>
+              {% if currently_blocked_ips|length > 0 %}
+                <div style="display: grid; gap: 6px; font-size: 12px;">
+                  {% for row in currently_blocked_ips %}
+                    <div style="display: grid; grid-template-columns: 1fr auto auto auto auto auto; gap: 8px; align-items: center; padding: 8px; background: rgba(0,0,0,0.25); border: 1px solid rgba(248,113,113,0.30); border-radius: 8px;">
+                      <a href="/dashboard/ip/{{ row.ip|urlencode }}" style="font-family: monospace; color: #93c5fd; font-weight: 900; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ row.ip }}</a>
+                      <span style="color: #fbbf24;" title="failed_attempts">FA: {{ row.failed_attempts }}</span>
+                      <span style="color: #f87171;" title="threat_score">TS: {{ row.threat_score }}</span>
+                      <span style="color: #9ca3af;" title="blocked_until">until {{ row.blocked_until[-19:] if row.blocked_until and row.blocked_until|length > 19 else row.blocked_until }}</span>
+                      <span style="color: #60a5fa;" title="blocked_count">#{{ row.blocked_count }}</span>
+                      <form method="POST" action="/dashboard/blocked-ips/{{ row.ip|urlencode }}/unblock" onsubmit="return confirm('Unblock {{ row.ip }}?');" style="margin:0;">
+                        <button type="submit" class="btn" style="padding: 4px 10px; font-size: 11px;">Unblock</button>
+                      </form>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted" style="font-size: 12px;">No active blocks.</div>
+              {% endif %}
+            </div>
+
+            <!-- Threat level breakdown -->
+            <div style="margin-bottom: 16px; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 12px;">
+              <div style="color: #9ca3af; font-size: 11px; font-weight: 900; margin-bottom: 8px;">THREAT BREAKDOWN</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
+                <div>
+                  <div style="color: #34d399; font-weight: 900;">{{ threat_safe }}</div>
+                  <div style="color: #9ca3af; font-size: 10px;">Safe</div>
+                </div>
+                <div>
+                  <div style="color: #fbbf24; font-weight: 900;">{{ threat_suspicious }}</div>
+                  <div style="color: #9ca3af; font-size: 10px;">Suspicious</div>
+                </div>
+                <div>
+                  <div style="color: #f87171; font-weight: 900;">{{ threat_threat }}</div>
+                  <div style="color: #9ca3af; font-size: 10px;">Threat</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top attacking IPs -->
+            <div style="padding: 10px; background: rgba(255,255,255,0.04); border-radius: 12px;">
+              <div style="color: #9ca3af; font-size: 11px; font-weight: 900; margin-bottom: 8px;">TOP ATTACKING IPs</div>
+              {% if top_attacking_ips|length > 0 %}
+                <div style="display: grid; gap: 6px; font-size: 12px;">
+                  {% for attacker in top_attacking_ips[:5] %}
+                    <div style="display: flex; justify-content: space-between; padding: 6px; background: rgba(248,113,113,0.08); border-radius: 8px; border: 1px solid rgba(248,113,113,0.20);">
+                      <a href="/dashboard/ip/{{ attacker.ip|urlencode }}" style="font-family: monospace; color: #60a5fa; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ attacker.ip }}</a>
+                      <span style="color: #f87171; font-weight: 900;">{{ attacker.attempt_count }} attempts</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted">No attacking IPs detected.</div>
+              {% endif %}
+            </div>
+
+            <!-- Enterprise multi-service metrics (Phase 2) -->
+            <div style="margin-top: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
+              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">SERVICE ACTIVITY (ENTERPRISE)</div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                <div>
+                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Service activity distribution</div>
+                  {% if service_activity_distribution|length > 0 %}
+                    {% for s in service_activity_distribution %}
+                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(96,165,250,0.10); border: 1px solid rgba(96,165,250,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
+                        <span style="font-family: monospace; color: #93c5fd;">{{ s.service_route }}</span>
+                        <span style="font-weight: 900; color: #60a5fa;">{{ s.attempt_count }} attempts</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="muted">No service activity recorded yet.</div>
+                  {% endif %}
+                </div>
+
+                <div>
+                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Top attacked services (failed attempts)</div>
+                  {% if top_attacked_services|length > 0 %}
+                    {% for s in top_attacked_services %}
+                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
+                        <span style="font-family: monospace; color: #60a5fa;">{{ s.service_route }}</span>
+                        <span style="font-weight: 900; color: #f87171;">{{ s.failed_count }} failed</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="muted">No failed service attempts recorded yet.</div>
+                  {% endif %}
+                </div>
+
+                <div>
+                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Failed attempts by service</div>
+                  {% if failed_attempts_by_service|length > 0 %}
+                    {% for s in failed_attempts_by_service %}
+                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
+                        <span style="font-family: monospace; color: #93c5fd;">{{ s.service_route }}</span>
+                        <span style="font-weight: 900; color: #f87171;">{{ s.failed_count }} failed</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="muted">No failed attempts recorded.</div>
+                  {% endif %}
+                </div>
+
+                <div>
+                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Threat counts by service (heuristic)</div>
+                  {% if threat_counts_by_service|length > 0 %}
+                    {% for s in threat_counts_by_service %}
+                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.20); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
+                        <span style="font-family: monospace; color: #fbbf24;">{{ s.service_route }}</span>
+                        <span style="font-weight: 900; color: #fbbf24;">{{ s.threat_count }} threats</span>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="muted">No threat-to-service correlation available.</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Monitoring information -->
+            <div style="margin-top: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
+              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">ℹ️ ABOUT THIS DASHBOARD</div>
+              <div style="color: #9ca3af; font-size: 11px; line-height: 1.5;">
+                Real-time monitoring of login attempts, AI-powered threat detection, and brute-force pattern analysis. Data refreshes automatically. Click "Admin Login" to test the honeypot.
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Phase 6 Task 3: Export Reports -->
+        <section class="grid" aria-label="Export reports" style="margin-top: 18px;">
+          <section class="panel">
+            <div class="panel-title">Export Reports</div>
+            <div style="padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
+              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📤 CSV EXPORTS</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: 12px;">
+                <a class="btn" href="/dashboard/export/login_attempts.csv" download>login_attempts.csv</a>
+                <a class="btn" href="/dashboard/export/threat_alerts.csv" download>threat_alerts.csv</a>
+                <a class="btn" href="/dashboard/export/suspicious_ips.csv" download>suspicious_ips.csv</a>
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: rgba(248,113,113,0.08); border-radius: 12px; border: 1px solid rgba(248,113,113,0.20);">
+              <div style="color: #f87171; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📄 PDF SECURITY REPORT</div>
+              <a class="btn" href="/dashboard/export/report.pdf" download style="display:inline-block; padding: 10px 14px; font-weight: 900; background: linear-gradient(180deg, rgba(248,113,113,1), rgba(248,113,113,0.78)); color: #07121f;">Download full report (PDF)</a>
+              <div style="color: #9ca3af; font-size: 11px; margin-top: 6px;">
+                Multi-section report: headline metrics, threat distribution, top attackers, top usernames, failure reasons, blocked IPs, recent activity.
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Phase 6 Task 2: Advanced Analytics -->
+        <section class="grid" aria-label="Advanced security analytics" style="margin-top: 18px;">
+          <section class="panel">
+            <div class="panel-title">Advanced Analytics</div>
+
+            <!-- A1: Hourly attempt volume (24h) -->
+            <div style="margin-bottom: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
+              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📈 HOURLY ATTEMPT VOLUME (24h)</div>
+              {% if hourly_attempt_volume|length > 0 %}
+                <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 12px;">
+                  {% set _max_attempts = 1 %}
+                  {% for row in hourly_attempt_volume %}
+                    {% if row.attempts > _max_attempts %}{% set _max_attempts = row.attempts %}{% endif %}
+                  {% endfor %}
+                  {% for row in hourly_attempt_volume %}
+                    <div style="display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; align-items: center;">
+                      <span style="color: #9ca3af; font-family: monospace; font-size: 11px;">{{ row.hour[-5:] }}</span>
+                      <div style="background: rgba(0,0,0,0.25); border-radius: 6px; height: 10px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (row.attempts * 100 / _max_attempts)|round(1) }}%; background: linear-gradient(90deg, rgba(96,165,250,0.85), rgba(96,165,250,0.55));"></div>
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (row.failed * 100 / _max_attempts)|round(1) }}%; background: linear-gradient(90deg, rgba(248,113,113,0.85), rgba(248,113,113,0.55));"></div>
+                      </div>
+                      <span style="color: #93c5fd; font-weight: 900; min-width: 60px; text-align: right;">{{ row.attempts }} <span style="color: #f87171; font-weight: 500;">({{ row.failed }} fail)</span></span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted" style="font-size: 12px;">No data in the last 24h.</div>
+              {% endif %}
+            </div>
+
+            <!-- A2: Top targeted usernames -->
+            <div style="margin-bottom: 14px; padding: 10px; background: rgba(251,191,36,0.08); border-radius: 12px; border: 1px solid rgba(251,191,36,0.20);">
+              <div style="color: #fbbf24; font-size: 11px; font-weight: 900; margin-bottom: 6px;">🎯 TOP TARGETED USERNAMES</div>
+              {% if top_targeted_usernames|length > 0 %}
+                <div style="display: grid; gap: 6px; font-size: 12px;">
+                  {% for u in top_targeted_usernames[:5] %}
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(251,191,36,0.20); border-radius: 8px;">
+                      <span style="font-family: monospace; color: #93c5fd; font-weight: 900;">{{ u.username }}</span>
+                      <span style="color: #fbbf24; font-weight: 900;">{{ u.attempts }} attempts</span>
+                      <span style="color: #f87171; font-weight: 500;">{{ u.failed }} failed</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted" style="font-size: 12px;">No data yet.</div>
+              {% endif %}
+            </div>
+
+            <!-- A3: Failure reason distribution -->
+            <div style="margin-bottom: 14px; padding: 10px; background: rgba(248,113,113,0.08); border-radius: 12px; border: 1px solid rgba(248,113,113,0.20);">
+              <div style="color: #f87171; font-size: 11px; font-weight: 900; margin-bottom: 6px;">⚠️ FAILURE REASONS</div>
+              {% if failure_reason_distribution|length > 0 %}
+                {% set _max_reason_n = 1 %}
+                {% for r in failure_reason_distribution %}
+                  {% if r.n > _max_reason_n %}{% set _max_reason_n = r.n %}{% endif %}
+                {% endfor %}
+                <div style="display: grid; gap: 6px; font-size: 12px;">
+                  {% for r in failure_reason_distribution %}
+                    <div style="display: grid; grid-template-columns: 200px 1fr 60px; gap: 8px; align-items: center;">
+                      <span style="color: #93c5fd; font-family: monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.reason }}">{{ r.reason }}</span>
+                      <div style="background: rgba(0,0,0,0.25); border-radius: 6px; height: 10px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (r.n * 100 / _max_reason_n)|round(1) }}%; background: linear-gradient(90deg, rgba(248,113,113,0.85), rgba(251,191,36,0.65));"></div>
+                      </div>
+                      <span style="color: #f87171; font-weight: 900; text-align: right;">{{ r.n }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="muted" style="font-size: 12px;">No data yet.</div>
+              {% endif %}
+            </div>
+          </section>
+        </section>
+
+
+        <div class="footer">
+          Smart Honeypot IDS • Flask + SQLite + Scikit-learn • AI-Enhanced Security Monitoring
+
+          <br />
+          <span style="font-size: 11px; margin-top: 4px; display: inline-block;">Last updated: {{ now }}</span>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Auto-refresh dashboard every 30 seconds
+      setInterval(function() {
+        location.reload();
+      }, 30000);
+    </script>
+  </body>
+</html>
+

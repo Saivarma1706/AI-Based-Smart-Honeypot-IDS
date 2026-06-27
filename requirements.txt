@@ -1,0 +1,8 @@
+requests
+Flask
+scikit-learn
+joblib
+flask-sqlalchemy
+Flask-WTF
+wtforms
+reportlab

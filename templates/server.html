@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Honeypot Portal</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+      /* Service-specific: infrastructure management portal UI */
+      .server-console {
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(96,165,250,0.22);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .server-head {
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        color: var(--muted);
+        font-weight: 900;
+        font-size: 12px;
+      }
+      .server-body { padding: 16px; }
+      .server-grid {
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items:start;
+      }
+      .server-panel {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 14px;
+        padding: 12px;
+      }
+      .server-panel h3 { margin: 0 0 8px; font-size: 13px; color: #9ca3af; }
+      .server-btn {
+        width: 100%;
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 950;
+        background: linear-gradient(180deg, rgba(96,165,250,1), rgba(96,165,250,0.78));
+        color: #07121f;
+        cursor:pointer;
+      }
+      .kv {
+        display:grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 12px;
+        font-size: 12px;
+        color:#cbd5e1;
+        line-height: 1.5;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+      .kv .k { color: #9ca3af; font-weight: 900; }
+      .tag {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(96,165,250,0.28);
+        background: rgba(96,165,250,0.10);
+        color: #93c5fd;
+        font-weight: 900;
+      }
+      @media (max-width: 760px) { .server-grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <main class="page">
+      <div class="shell">
+        <header class="brand">
+          <div class="logo" aria-hidden="true"><span class="shield">🖥️</span></div>
+          <div>
+            <h1 class="title">Infrastructure Control</h1>
+            <p class="subtitle">Honeypot: simulated server management portal</p>
+          </div>
+        </header>
+
+        {% if message %}
+        <section class="banner" role="status">
+          {% if message == 'Admin Console Unlocked' %}
+            <div class="banner ok">Console Unlocked</div>
+          {% else %}
+            <div class="banner danger">{{ message }}</div>
+          {% endif %}
+        </section>
+        {% endif %}
+
+        <section class="server-console" aria-label="Server management">
+          <div class="server-head">
+            <div>InfraOps Manager • Secure Gateway</div>
+            <div>auth • POST /server</div>
+          </div>
+          <div class="server-body">
+            <div class="server-grid">
+              <div class="server-panel">
+                <h3>Administrator Login</h3>
+<form class="terminal-form" method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                  <div class="db-field">
+                    <label class="label">Username</label>
+                    <input class="db-input" type="text" name="username" required placeholder="sys_admin" />
+                  </div>
+                  <div class="db-field">
+                    <label class="label">Password</label>
+                    <input class="db-input" type="password" name="password" required placeholder="CoreAccess@2026" />
+                  </div>
+                  <button class="server-btn" type="submit">Enter Management</button>
+                </form>
+              </div>
+              <div class="server-panel">
+                <h3>System Snapshot</h3>
+                <div class="kv">
+                  <div class="k">Environment</div><div>PROD-EDGE</div>
+                  <div class="k">Controls</div><div class="tag">IDS + AI</div>
+                  <div class="k">Session</div><div>{{ 'Active' if message == 'Admin Console Unlocked' else 'Locked' }}</div>
+                  <div class="k">Audit</div><div>enabled</div>
+                  <div class="k">Targets</div><div>honeypot services</div>
+                  <div class="k">Alerts</div><div>on suspicious auth</div>
+                </div>
+                <div style="margin-top: 12px; color: var(--muted); font-size: 12px;">
+                  Attempts are recorded with IP and analyzed with both rules + ML.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-row">
+            <span class="footer-pill">Infra Monitoring</span>
+            <span class="footer-muted">/server • Threat Correlation</span>
+          </div>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
+

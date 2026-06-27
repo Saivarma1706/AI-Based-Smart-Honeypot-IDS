@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+
+# Build Output
+build/
+dist/
+main.build/
+main.dist/
+final_build/
+obfuscated/
+
+# Logs
+logs/*.log
+
+# VS Code
+.vscode/
+
+# IDE
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Database Journals
+*.db-journal
