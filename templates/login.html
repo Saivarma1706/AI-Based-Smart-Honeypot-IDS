@@ -3,122 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enterprise Secure Access Portal</title>
+    <meta name="description" content="Smart Honeypot IDS — Secure access portal for enterprise security monitoring." />
+    <title>Smart Honeypot IDS — Secure Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/style.css" />
   </head>
 
   <body>
-    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="login-wrapper" role="main">
 
-    <main class="page">
-      <div class="shell">
-        <header class="brand">
-          <div class="logo" aria-hidden="true">
-            <span class="shield">🛡️</span>
-          </div>
-          <div>
-            <h1 class="title">Enterprise Secure Access Portal</h1>
-            <p class="subtitle">Internal Infrastructure Management System</p>
-          </div>
-        </header>
-
-        <section class="statusbar" aria-live="polite">
-          <div class="status-left">
-            <div class="status-label">System Status</div>
-            <div class="status-pill">
-              <span class="dot ok" aria-hidden="true"></span>
-              <span>Monitoring Active</span>
-            </div>
+      <!-- LEFT PANEL -->
+      <aside class="brand-panel" aria-label="Product information">
+        <div class="brand-inner">
+          <div class="brand-logo" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M18 3L4 9V19C4 26.2 10.2 32.9 18 35C25.8 32.9 32 26.2 32 19V9L18 3Z" fill="currentColor" opacity="0.15"/>
+              <path d="M18 3L4 9V19C4 26.2 10.2 32.9 18 35C25.8 32.9 32 26.2 32 19V9L18 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <circle cx="18" cy="18" r="4" fill="currentColor"/>
+            </svg>
           </div>
 
-          <div class="status-right">
-            <div class="status-label">Last Login</div>
-            <div class="status-value" id="last-login">—</div>
-          </div>
-        </section>
-
-        {% if message %}
-        <section class="banner" role="status">
-          {% if message == 'Login Successful' %}
-            <div class="banner ok">Access Granted</div>
-          {% elif message == 'Invalid Credentials' %}
-            <div class="banner danger">Invalid Credentials</div>
-          {% else %}
-            <div class="banner warn">{{ message }}</div>
-          {% endif %}
-        </section>
-        {% endif %}
-
-        <div class="card" role="region" aria-label="Admin login">
-          <div class="card-head">
-            <div class="card-title">Authorized Personnel Only</div>
-            <div class="card-subtitle">Use your credentials to access the honeypot monitoring console.</div>
+          <div class="brand-content">
+            <h1 class="brand-name">Smart Honeypot IDS</h1>
+            <p class="brand-tagline">AI-Based Smart Honeypot<br />Intrusion Detection System</p>
           </div>
 
-          <form class="terminal-form" method="POST">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="brand-divider" aria-hidden="true"></div>
 
-            <label class="field">
-              <span class="label">Username</span>
-              <input
-                type="text"
-                name="username"
-                autocomplete="username"
-                required
-                placeholder="sys_admin"
-              />
-            </label>
+          <ul class="brand-pillars" aria-label="Platform capabilities">
+            <li class="pillar">
+              <span class="pillar-word">Detect.</span>
+            </li>
+            <li class="pillar">
+              <span class="pillar-word">Deceive.</span>
+            </li>
+            <li class="pillar">
+              <span class="pillar-word">Analyze.</span>
+            </li>
+          </ul>
 
-            <label class="field">
-              <span class="label">Password</span>
-              <input
-                type="password"
-                name="password"
-                autocomplete="current-password"
-                required
-                placeholder="CoreAccess@2026"
-              />
-            </label>
-
-            <div class="actions">
-              <button type="submit" class="btn">
-                <span class="btn-glow" aria-hidden="true"></span>
-                Login
-              </button>
-            </div>
-
-            <div class="hint">
-              <span class="hint-icon" aria-hidden="true">🔒</span>
-              <span>Credentials are validated using salted SHA-256 hashing.</span>
-            </div>
-
-            <div class="nav-row">
-              <span class="muted">Admin Dashboard (placeholder)</span>
-              <span class="muted">→ Use /dashboard after login</span>
-            </div>
-          </form>
+          <div class="brand-footer-note" aria-hidden="true">
+            Authorized access only.
+          </div>
         </div>
+      </aside>
 
-        <footer class="footer">
-          <div class="footer-row">
-            <span class="footer-pill">AI + IDS Ready</span>
-            <span class="footer-muted">Flask • SQLite • Scikit-learn</span>
+      <!-- RIGHT PANEL -->
+      <section class="form-panel" aria-label="Login form">
+        <div class="form-inner">
+
+          <div class="form-header">
+            <h2 class="form-title">Welcome back</h2>
+            <p class="form-subtitle">Sign in to your security console</p>
           </div>
-          <div class="footer-note">Built for secure monitoring demos and training.</div>
-        </footer>
-      </div>
-    </main>
 
-    <script>
-      // Beginner-friendly placeholder: last login UI demo.
-      // The backend can be extended later without changing the UI layout.
-      (function () {
-        const el = document.getElementById('last-login');
-        if (!el) return;
-        const now = new Date();
-        el.textContent = now.toLocaleString();
-      })();
-    </script>
+          {% if message %}
+          <div class="alert-box {% if message == 'Login Successful' %}alert-success{% elif message == 'Invalid Credentials' %}alert-error{% else %}alert-warn{% endif %}" role="alert" aria-live="polite">
+            <span class="alert-icon" aria-hidden="true">
+              {% if message == 'Login Successful' %}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {% else %}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="8" cy="11" r="0.875" fill="currentColor"/></svg>
+              {% endif %}
+            </span>
+            <span class="alert-text">
+              {% if message == 'Login Successful' %}
+                Access granted.
+              {% elif message == 'Invalid Credentials' %}
+                Invalid credentials. Please try again.
+              {% else %}
+                {{ message }}
+              {% endif %}
+            </span>
+          </div>
+          {% endif %}
+
+          <form class="login-form" method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+            <div class="field-group">
+              <label class="field-label" for="username">Username</label>
+              <div class="field-wrap">
+                <span class="field-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 13.5C2.5 11 5 9 8 9s5.5 2 5.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                </span>
+                <input
+                  id="username"
+                  type="text"
+                  name="username"
+                  autocomplete="username"
+                  required
+                  placeholder="Enter username"
+                  class="field-input"
+                />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="password">Password</label>
+              <div class="field-wrap">
+                <span class="field-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                </span>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  autocomplete="current-password"
+                  required
+                  placeholder="Enter password"
+                  class="field-input"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="login-submit-btn">
+              <span class="submit-label">Sign In</span>
+              <span class="submit-arrow" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+          </form>
+
+          <p class="form-legal">
+            Access is restricted to authorized personnel.<br />
+            All sessions are monitored and recorded.
+          </p>
+        </div>
+      </section>
+
+    </div>
   </body>
 </html>
-
