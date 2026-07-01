@@ -130,6 +130,10 @@ def register_service_routes(app) -> None:
 
         return render_template("server.html", message=message)
 
+    @bp.route("/api", methods=["GET"])
+    def api_portal():
+        return render_template("api.html")
+
     @bp.route("/api/auth", methods=["POST"])
     def api_auth():
         payload = request.get_json(silent=True) or {}

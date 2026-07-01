@@ -1,145 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Server Honeypot Portal</title>
-    <link rel="stylesheet" href="/static/style.css" />
-    <style>
-      /* Service-specific: infrastructure management portal UI */
-      .server-console {
-        background: rgba(0, 0, 0, 0.18);
-        border: 1px solid rgba(96,165,250,0.22);
-        border-radius: 16px;
-        overflow: hidden;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Enterprise Web Server Administration" />
+  <title>Enterprise Web Server Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-page: #0f1117;
+      --bg-panel: #161b22;
+      --bg-card: #0d1117;
+      --text-main: #e2e8f0;
+      --text-muted: #9ca3af;
+      --border-color: #30363d;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #4ade80;
+      --error: #f87171;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .login-container {
+      display: flex;
+      width: 100%;
+      max-width: 900px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+      margin: 24px;
+    }
+
+    /* Left side - Login Form */
+    .login-form-area {
+      flex: 1;
+      padding: 48px;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+    }
+
+    .form-header h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    .form-header p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .field-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 14px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .field-input:disabled {
+      background: #1c2128;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+    
+    .field-input:focus:not(:disabled) {
+      border-color: var(--accent);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 12px;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Right side - Info Panel */
+    .info-panel {
+      width: 320px;
+      background: #0d1117;
+      padding: 48px 32px;
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .info-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-title::before {
+      content: '🌐';
+      font-size: 20px;
+    }
+
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .info-list li {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      line-height: 1.5;
+    }
+
+    .info-list li::before {
+      content: '•';
+      color: var(--accent);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Message Block */
+    .msg-block {
+      display: none;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .msg-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+    }
+
+    .msg-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .login-container {
+        flex-direction: column;
       }
-      .server-head {
-        padding: 12px 14px;
-        background: rgba(255,255,255,0.04);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        display:flex;
-        justify-content: space-between;
-        align-items:center;
-        color: var(--muted);
-        font-weight: 900;
-        font-size: 12px;
-      }
-      .server-body { padding: 16px; }
-      .server-grid {
-        display:grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        align-items:start;
-      }
-      .server-panel {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 14px;
-        padding: 12px;
-      }
-      .server-panel h3 { margin: 0 0 8px; font-size: 13px; color: #9ca3af; }
-      .server-btn {
+      .info-panel {
         width: 100%;
-        border: 0;
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-weight: 950;
-        background: linear-gradient(180deg, rgba(96,165,250,1), rgba(96,165,250,0.78));
-        color: #07121f;
-        cursor:pointer;
+        box-sizing: border-box;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        padding: 32px;
       }
-      .kv {
-        display:grid;
-        grid-template-columns: 1fr auto;
-        gap: 8px 12px;
-        font-size: 12px;
-        color:#cbd5e1;
-        line-height: 1.5;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      .login-form-area {
+        padding: 32px;
       }
-      .kv .k { color: #9ca3af; font-weight: 900; }
-      .tag {
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(96,165,250,0.28);
-        background: rgba(96,165,250,0.10);
-        color: #93c5fd;
-        font-weight: 900;
-      }
-      @media (max-width: 760px) { .server-grid { grid-template-columns: 1fr; } }
-    </style>
-  </head>
-  <body>
-    <div class="bg-grid" aria-hidden="true"></div>
-    <main class="page">
-      <div class="shell">
-        <header class="brand">
-          <div class="logo" aria-hidden="true"><span class="shield">🖥️</span></div>
-          <div>
-            <h1 class="title">Infrastructure Control</h1>
-            <p class="subtitle">Honeypot: simulated server management portal</p>
-          </div>
-        </header>
-
-        {% if message %}
-        <section class="banner" role="status">
-          {% if message == 'Admin Console Unlocked' %}
-            <div class="banner ok">Console Unlocked</div>
-          {% else %}
-            <div class="banner danger">{{ message }}</div>
-          {% endif %}
-        </section>
-        {% endif %}
-
-        <section class="server-console" aria-label="Server management">
-          <div class="server-head">
-            <div>InfraOps Manager • Secure Gateway</div>
-            <div>auth • POST /server</div>
-          </div>
-          <div class="server-body">
-            <div class="server-grid">
-              <div class="server-panel">
-                <h3>Administrator Login</h3>
-<form class="terminal-form" method="POST">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-
-                  <div class="db-field">
-                    <label class="label">Username</label>
-                    <input class="db-input" type="text" name="username" required placeholder="sys_admin" />
-                  </div>
-                  <div class="db-field">
-                    <label class="label">Password</label>
-                    <input class="db-input" type="password" name="password" required placeholder="CoreAccess@2026" />
-                  </div>
-                  <button class="server-btn" type="submit">Enter Management</button>
-                </form>
-              </div>
-              <div class="server-panel">
-                <h3>System Snapshot</h3>
-                <div class="kv">
-                  <div class="k">Environment</div><div>PROD-EDGE</div>
-                  <div class="k">Controls</div><div class="tag">IDS + AI</div>
-                  <div class="k">Session</div><div>{{ 'Active' if message == 'Admin Console Unlocked' else 'Locked' }}</div>
-                  <div class="k">Audit</div><div>enabled</div>
-                  <div class="k">Targets</div><div>honeypot services</div>
-                  <div class="k">Alerts</div><div>on suspicious auth</div>
-                </div>
-                <div style="margin-top: 12px; color: var(--muted); font-size: 12px;">
-                  Attempts are recorded with IP and analyzed with both rules + ML.
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <footer class="footer">
-          <div class="footer-row">
-            <span class="footer-pill">Infra Monitoring</span>
-            <span class="footer-muted">/server • Threat Correlation</span>
-          </div>
-        </footer>
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Panel -->
+    <div class="login-form-area">
+      <div class="form-header">
+        <h1>Enterprise Web Server</h1>
+        <p>Secure Administration Console</p>
       </div>
-    </main>
-  </body>
+
+      <div id="formBlock">
+        <form method="POST" action="/server">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}" />
+
+          <div class="field-group">
+            <label class="field-label" for="server_address">Server Address</label>
+            <input type="text" id="server_address" class="field-input" value="web01.internal.local" disabled />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="username">Username</label>
+            <input type="text" id="username" name="username" class="field-input" required autocomplete="username" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="field-input" required autocomplete="current-password" />
+          </div>
+
+          <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+      </div>
+
+      <div id="msgBlock" class="msg-block">
+        <h2 id="msgTitle" class="msg-title"></h2>
+        <p id="msgDesc" class="msg-desc"></p>
+      </div>
+
+    </div>
+
+    <!-- Right Panel -->
+    <div class="info-panel">
+      <div class="info-title">Server Status</div>
+      <ul class="info-list">
+        <li>TLS Enabled</li>
+        <li>Session Logging Active</li>
+        <li>Request Monitoring Enabled</li>
+        <li>Reverse Proxy Protected</li>
+      </ul>
+    </div>
+  </div>
+
+  {% if message %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const message = "{{ message }}";
+      const formBlock = document.getElementById('formBlock');
+      const msgBlock = document.getElementById('msgBlock');
+      const msgTitle = document.getElementById('msgTitle');
+      const msgDesc = document.getElementById('msgDesc');
+
+      if (message) {
+        formBlock.style.display = 'none';
+        msgBlock.style.display = 'block';
+
+        if (message === 'Admin Console Unlocked') {
+          msgTitle.innerHTML = 'Server authenticated.';
+          msgTitle.style.color = 'var(--success)';
+          msgDesc.innerHTML = 'Loading administration console...<br>Redirecting...';
+          setTimeout(function() {
+            window.location.href = '/dashboard';
+          }, 1500);
+        } else {
+          msgTitle.innerHTML = 'Authentication failed.';
+          msgTitle.style.color = 'var(--error)';
+          msgDesc.innerHTML = 'Access attempt logged.';
+        }
+      }
+    });
+  </script>
+  {% endif %}
+</body>
 </html>
 

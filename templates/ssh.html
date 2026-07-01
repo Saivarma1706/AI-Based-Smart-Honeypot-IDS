@@ -1,149 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSH Honeypot Portal</title>
-    <link rel="stylesheet" href="/static/style.css" />
-    <style>
-      /* Service-specific: terminal-style SSH login UI */
-      .terminal-wrap {
-        margin-top: 10px;
-        background: rgba(0, 0, 0, 0.25);
-        border: 1px solid rgba(96, 165, 250, 0.22);
-        border-radius: 16px;
-        overflow: hidden;
-      }
-      .terminal-head {
-        padding: 12px 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.04);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 800;
-      }
-      .terminal-body {
-        padding: 18px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        background: radial-gradient(700px 240px at 20% 0%, rgba(96,165,250,0.18), transparent),
-          rgba(0, 0, 0, 0.22);
-      }
-      .prompt-line { color: #93c5fd; margin-bottom: 14px; line-height: 1.4; }
-      .terminal-form {
-        display: grid;
-        gap: 10px;
-        max-width: 520px;
-      }
-      .term-row {
-        display: grid;
-        grid-template-columns: 140px 1fr;
-        gap: 10px;
-        align-items: center;
-      }
-      .term-label {
-        color: #9ca3af;
-        font-size: 12px;
-        font-weight: 900;
-      }
-      .term-input {
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(0,0,0,0.22);
-        color: #e5e7eb;
-        outline: none;
-      }
-      .term-input:focus { border-color: rgba(96,165,250,0.55); box-shadow: 0 0 0 4px rgba(96,165,250,0.18); }
-      .terminal-actions { margin-top: 6px; display:flex; gap: 10px; }
-      .terminal-btn {
-        flex: 1;
-        border: 0;
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-weight: 950;
-        background: linear-gradient(180deg, rgba(96,165,250,1), rgba(96,165,250,0.78));
-        color: #07121f;
-        cursor: pointer;
-      }
-      .status-line {
-        margin-top: 14px;
-        font-weight: 900;
-      }
-      .ok { color: #34d399; }
-      .bad { color: #f87171; }
-      @media (max-width: 620px) { .term-row { grid-template-columns: 1fr; } }
-    </style>
-  </head>
-  <body>
-    <div class="bg-grid" aria-hidden="true"></div>
-    <main class="page">
-      <div class="shell">
-        <header class="brand">
-          <div class="logo" aria-hidden="true"><span class="shield">🔐</span></div>
-          <div>
-            <h1 class="title">SSH Access Portal</h1>
-            <p class="subtitle">Honeypot: simulated SSH authentication (terminal UI)</p>
-          </div>
-        </header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSH Honeypot</title>
+  <style>
+    :root {
+      /* Matches the enterprise dark theme background */
+      --bg-page: #0f1117;
+      --text-main: #e2e8f0;
+      --text-muted: #9ca3af;
+      --success: #4ade80;
+      --error: #f87171;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-        {% if message %}
-        <section class="banner" role="status">
-          {% if message == 'Access Granted' %}
-            <div class="banner ok">Session Opened</div>
-          {% else %}
-            <div class="banner danger">{{ message }}</div>
-          {% endif %}
-        </section>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .terminal {
+      padding: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .system-info {
+      margin-bottom: 24px;
+      color: var(--text-muted);
+      white-space: pre-line;
+    }
+    
+    .system-info strong {
+      color: var(--text-main);
+      font-weight: normal;
+    }
+
+    .status-msg {
+      margin-bottom: 24px;
+      white-space: pre-line;
+    }
+
+    .msg-success {
+      color: var(--success);
+    }
+
+    .msg-error {
+      color: var(--error);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .prompt {
+      color: var(--text-main);
+      margin-right: 12px;
+      min-width: 90px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: inherit;
+      outline: none;
+      padding: 0;
+      flex: 1;
+    }
+
+    input:-webkit-autofill {
+      -webkit-text-fill-color: var(--text-main);
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    
+    /* A subtle focus indicator for accessibility */
+    input:focus {
+      border-bottom: 1px solid #334155;
+    }
+
+    .btn-connect {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: inherit;
+      padding: 0;
+      margin-top: 12px;
+      cursor: pointer;
+      text-align: left;
+      width: fit-content;
+      transition: color 150ms ease;
+    }
+
+    .btn-connect:hover,
+    .btn-connect:focus {
+      color: var(--text-main);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="system-info">
+      <strong>Ubuntu Server 24.04 LTS</strong>
+      Authorized access only.
+    </div>
+
+    {% if message %}
+      <div class="status-msg">
+        {% if message == 'Access Granted' %}
+          <div class="msg-success">Authentication successful.
+Establishing secure session...
+Redirecting...</div>
+          <script>
+            setTimeout(function() {
+              window.location.href = '/dashboard';
+            }, 1500);
+          </script>
+        {% else %}
+          <div class="msg-error">Permission denied.
+Please try again.</div>
         {% endif %}
-
-        <section class="terminal-wrap" aria-label="SSH terminal">
-          <div class="terminal-head">
-            <div>ssh@honeypot-host</div>
-            <div>auth.log • tty0</div>
-          </div>
-          <div class="terminal-body">
-            <div class="prompt-line">
-              Welcome to CoreOps Secure Gateway
-              <br />
-              Authorized access only. All attempts are monitored.
-            </div>
-
-            <form class="terminal-form" method="POST">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-              <div class="term-row">
-                <div class="term-label">Username</div>
-                <input class="term-input" type="text" name="username" required placeholder="sys_admin" />
-              </div>
-              <div class="term-row">
-                <div class="term-label">Password</div>
-                <input class="term-input" type="password" name="password" required placeholder="CoreAccess@2026" />
-              </div>
-              <div class="terminal-actions">
-                <button class="terminal-btn" type="submit">Login</button>
-              </div>
-            </form>
-
-            <div class="status-line {% if message == 'Access Granted' %}ok{% else %}bad{% endif %}" aria-live="polite">
-              {% if message %}
-                {{ message }}
-              {% else %}
-                Ready. Waiting for credentials…
-              {% endif %}
-            </div>
-          </div>
-        </section>
-
-        <footer class="footer">
-          <div class="footer-row">
-            <span class="footer-pill">AI + IDS Monitoring</span>
-            <span class="footer-muted">/ssh • Flask • SQLite</span>
-          </div>
-        </footer>
       </div>
-    </main>
-  </body>
+    {% endif %}
+
+    <form method="POST" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      
+      <div class="form-row">
+        <span class="prompt">login as:</span>
+        <input type="text" name="username" required autofocus spellcheck="false" autocomplete="off" />
+      </div>
+      
+      <div class="form-row">
+        <span class="prompt">password:</span>
+        <input type="password" name="password" required autocomplete="off" />
+      </div>
+
+      <button type="submit" class="btn-connect">[ Connect ]</button>
+    </form>
+  </div>
+</body>
 </html>
 

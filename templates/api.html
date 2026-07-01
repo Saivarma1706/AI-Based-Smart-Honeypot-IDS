@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Developer Portal</title>
+  <style>
+    :root {
+      --bg-page: #0f1117;
+      --bg-panel: #161b22;
+      --bg-card: #0d1117;
+      --text-main: #e2e8f0;
+      --text-muted: #9ca3af;
+      --border-color: #30363d;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #4ade80;
+      --error: #f87171;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      --badge-post: #10b981;
+      --badge-post-bg: rgba(16, 185, 129, 0.1);
+      --badge-get: #3b82f6;
+      --badge-get-bg: rgba(59, 130, 246, 0.1);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      margin: 0 0 16px 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+    }
+
+    /* Endpoints List */
+    .endpoints {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .endpoint-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .badge-post {
+      color: var(--badge-post);
+      background: var(--badge-post-bg);
+    }
+
+    .badge-get {
+      color: var(--badge-get);
+      background: var(--badge-get-bg);
+    }
+
+    .endpoint-url {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: #ffffff;
+      flex: 1;
+    }
+
+    .endpoint-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Testing Panel */
+    .testing-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      height: fit-content;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.02);
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 15px;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .form-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: var(--font-mono);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+
+    .btn-send {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-send:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Output Console */
+    .output-console {
+      margin-top: 20px;
+      background: #000000;
+      border-radius: 6px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .output-success {
+      color: var(--success);
+    }
+
+    .output-error {
+      color: var(--error);
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Enterprise REST API Gateway</h1>
+      <div class="status-bar">
+        <div class="status-item">API Version: v1.0</div>
+        <div class="status-item">Environment: Production</div>
+        <div class="status-item"><div class="status-dot"></div>Status: Online</div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- Left: Endpoints -->
+      <div class="endpoints">
+        <div class="endpoint-card">
+          <div class="badge badge-post">POST</div>
+          <div class="endpoint-url">/api/auth</div>
+          <div class="endpoint-desc">Authenticate and receive token</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="badge badge-post">POST</div>
+          <div class="endpoint-url">/api/login</div>
+          <div class="endpoint-desc">Legacy authentication endpoint</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="badge badge-get">GET</div>
+          <div class="endpoint-url">/api/users</div>
+          <div class="endpoint-desc">Retrieve user directory</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="badge badge-get">GET</div>
+          <div class="endpoint-url">/api/profile</div>
+          <div class="endpoint-desc">Get current user profile</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="badge badge-post">POST</div>
+          <div class="endpoint-url">/api/token</div>
+          <div class="endpoint-desc">Refresh JWT token</div>
+        </div>
+      </div>
+
+      <!-- Right: Testing Panel -->
+      <div class="testing-panel">
+        <div class="panel-header">Interactive Testing</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Authorization Token</label>
+            <input type="text" class="form-input" id="authToken" placeholder="Bearer ..." autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Request Body (JSON)</label>
+            <textarea class="form-input" id="reqBody" spellcheck="false">{
+  "username": "sys_admin",
+  "password": "CoreAccess@2026"
+}</textarea>
+          </div>
+          
+          <input type="hidden" id="csrf_token" value="{{ csrf_token() if csrf_token else '' }}" />
+
+          <button type="button" class="btn-send" id="btnSend">[ Send Request ]</button>
+
+          <div class="output-console" id="outputConsole"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('btnSend').addEventListener('click', async function() {
+      const consoleEl = document.getElementById('outputConsole');
+      const reqBodyStr = document.getElementById('reqBody').value;
+      const csrfToken = document.getElementById('csrf_token').value;
+      
+      consoleEl.style.display = 'block';
+      consoleEl.className = 'output-console';
+      consoleEl.textContent = 'Sending request...';
+
+      let payload;
+      try {
+        payload = JSON.parse(reqBodyStr);
+      } catch (e) {
+        consoleEl.textContent = 'HTTP/1.1 400 Bad Request\nInvalid JSON in Request Body.';
+        consoleEl.className = 'output-console output-error';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          consoleEl.className = 'output-console output-success';
+          consoleEl.innerHTML = 'HTTP/1.1 200 OK\nAuthentication successful.\nRedirecting...';
+          setTimeout(function() {
+            window.location.href = '/dashboard';
+          }, 1500);
+        } else {
+          consoleEl.className = 'output-console output-error';
+          consoleEl.innerHTML = 'HTTP/1.1 401 Unauthorized\nInvalid authentication token.\nRequest logged.';
+        }
+      } catch (error) {
+        consoleEl.className = 'output-console output-error';
+        consoleEl.innerHTML = 'Network Error.\nRequest logged.';
+      }
+    });
+  </script>
+</body>
+</html>

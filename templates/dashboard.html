@@ -3,467 +3,1768 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cybersecurity Monitoring Dashboard - Smart Honeypot IDS</title>
+    <meta name="description" content="Smart Honeypot IDS — Security Operations Center." />
+    <title>Smart Honeypot IDS — SOC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/static/dashboard.css" />
   </head>
 
   <body>
     <div class="page">
-      <!-- Sidebar navigation -->
-      <aside class="sidebar">
+
+      <!-- ── Sidebar ─────────────────────────────────────────── -->
+      <aside class="sidebar" aria-label="Sidebar navigation">
+
         <div class="brand">
-          <span class="brand-dot" aria-hidden="true"></span>
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+              <path d="M18 3L4 9V19C4 26.2 10.2 32.9 18 35C25.8 32.9 32 26.2 32 19V9L18 3Z" fill="currentColor" opacity="0.15"/>
+              <path d="M18 3L4 9V19C4 26.2 10.2 32.9 18 35C25.8 32.9 32 26.2 32 19V9L18 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <circle cx="18" cy="18" r="4" fill="currentColor"/>
+            </svg>
+          </div>
           <div>
             <div class="brand-title">Smart Honeypot IDS</div>
-            <div class="brand-sub">Security Monitoring</div>
+            <div class="brand-sub">Security Operations Center</div>
           </div>
         </div>
 
-        <nav class="nav" aria-label="Dashboard navigation">
-          <a class="active" href="/dashboard">
-            <span>Dashboard</span>
-            <span aria-hidden="true">›</span>
+        <nav class="nav" aria-label="Main navigation">
+          <a href="#" class="nav-link active" data-view="dashboard" aria-current="page">
+            <span class="nav-item-inner">
+              <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </span>
           </a>
-          <a href="/">
-            <span>Admin Login</span>
-            <span aria-hidden="true">›</span>
+          <a href="#" class="nav-link" data-view="services">
+            <span class="nav-item-inner">
+              <i class="fa-solid fa-server nav-icon" aria-hidden="true"></i>
+              <span>Honeypot Services</span>
+            </span>
+          </a>
+          <a href="#" class="nav-link" data-view="logs">
+            <span class="nav-item-inner">
+              <i class="fa-solid fa-list-ul nav-icon" aria-hidden="true"></i>
+              <span>Attack Logs</span>
+            </span>
+          </a>
+          <a href="#" class="nav-link" data-view="reports">
+            <span class="nav-item-inner">
+              <i class="fa-solid fa-file-export nav-icon" aria-hidden="true"></i>
+              <span>Reports</span>
+            </span>
+          </a>
+          <a href="#" class="nav-link" data-view="analytics">
+            <span class="nav-item-inner">
+              <i class="fa-solid fa-chart-line nav-icon" aria-hidden="true"></i>
+              <span>Analytics</span>
+            </span>
           </a>
         </nav>
 
-        <div class="footer" style="margin-top: 18px;">
-          <div><strong>Threat Level:</strong></div>
-          <div style="margin-top: 4px; font-weight: 900; letter-spacing: 0.5px;">
-            {% if ai_threat_level == 'Critical' %}
-              <span style="color: #f87171;">🔴 CRITICAL</span>
-            {% elif ai_threat_level == 'High' %}
-              <span style="color: #fbbf24;">🟠 HIGH</span>
-            {% elif ai_threat_level == 'Medium' %}
-              <span style="color: #60a5fa;">🔵 MEDIUM</span>
-            {% else %}
-              <span style="color: #34d399;">🟢 LOW</span>
-            {% endif %}
+        <div class="sidebar-threat">
+          <div class="sidebar-threat-label">AI Threat Level</div>
+          <div class="sidebar-threat-value
+            {% if ai_threat_level == 'Critical' %}threat-critical
+            {% elif ai_threat_level == 'High' %}threat-high
+            {% elif ai_threat_level == 'Medium' %}threat-medium
+            {% else %}threat-low{% endif %}">
+            <span class="threat-dot" aria-hidden="true"></span>
+            {% if ai_threat_level == 'Critical' %}CRITICAL
+            {% elif ai_threat_level == 'High' %}HIGH
+            {% elif ai_threat_level == 'Medium' %}MEDIUM
+            {% else %}LOW{% endif %}
           </div>
-          <div style="margin-top: 8px; color: #9ca3af; font-size: 11px;">
-            Updated every 30 seconds
-          </div>
+          <div class="sidebar-threat-sub">Refreshes every 30 seconds</div>
         </div>
       </aside>
 
-      <!-- Main content -->
+      <!-- ── Main ─────────────────────────────────────────────── -->
       <main class="main">
-        <!-- Header -->
+
+        <!-- Shared topbar -->
         <div class="topbar">
           <div>
-            <h1 class="h1">Cybersecurity Monitoring Dashboard</h1>
-            <div class="muted">Real-time intrusion detection & AI-powered threat analysis</div>
+            <h1 class="h1" id="page-title">Smart Honeypot IDS</h1>
+            <div class="topbar-sub" id="page-subtitle">Security Operations Center</div>
           </div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <div class="muted" style="font-weight:600;">Signed in as: {{ username }}</div>
-            <a class="btn" href="/logout">Logout</a>
-          </div>
-
-        </div>
-
-        <!-- Key metrics cards -->
-        <section class="cards" aria-label="Key security metrics">
-          <!-- Total Login Attempts -->
-          <div class="card">
-            <div class="card-label">Total Login Attempts</div>
-            <div class="card-value">{{ total_attempts }}</div>
-            <div class="indicator ok" style="margin-top: 10px;">
-              <span class="light" aria-hidden="true"></span>
-              <span>Monitored</span>
-            </div>
-          </div>
-
-          <!-- Failed Logins -->
-          <div class="card">
-            <div class="card-label">Failed Login Attempts</div>
-            <div class="card-value">{{ failed_logins }}</div>
-            {% if failed_logins >= 10 %}
-              <div class="indicator danger" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>High activity</span>
-              </div>
-            {% elif failed_logins >= 5 %}
-              <div class="indicator warn" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Elevated</span>
-              </div>
-            {% else %}
-              <div class="indicator ok" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Normal</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Threat Alerts -->
-          <div class="card">
-            <div class="card-label">Threat Alerts Generated</div>
-            <div class="card-value">{{ threat_alerts }}</div>
-            {% if threat_alerts >= 5 %}
-              <div class="indicator danger" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Active threats</span>
-              </div>
-            {% elif threat_alerts >= 2 %}
-              <div class="indicator warn" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Monitor closely</span>
-              </div>
-            {% else %}
-              <div class="indicator ok" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Secure</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Suspicious IPs -->
-          <div class="card">
-            <div class="card-label">Suspicious IP Addresses</div>
-            <div class="card-value">{{ suspicious_ips }}</div>
-            {% if suspicious_ips >= 3 %}
-              <div class="indicator danger" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Pattern detected</span>
-              </div>
-            {% elif suspicious_ips > 0 %}
-              <div class="indicator warn" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Tracking</span>
-              </div>
-            {% else %}
-              <div class="indicator ok" style="margin-top: 10px;">
-                <span class="light" aria-hidden="true"></span>
-                <span>Clean</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- AI Threat Prediction -->
-          <div class="card">
-            <div class="card-label">AI Threat Assessment</div>
-            <div class="card-value" style="font-size: 20px;">
-              {% if ai_threat_level == 'Critical' %}
-                <span style="color: #f87171;">🔴</span> CRITICAL
-              {% elif ai_threat_level == 'High' %}
-                <span style="color: #fbbf24;">🟠</span> HIGH
-              {% elif ai_threat_level == 'Medium' %}
-                <span style="color: #60a5fa;">🔵</span> MEDIUM
-              {% else %}
-                <span style="color: #34d399;">🟢</span> LOW
-              {% endif %}
-            </div>
-            <div style="margin-top: 10px; color: #9ca3af; font-size: 11px;">
-              ML-based assessment
-            </div>
-          </div>
-        </section>
-
-        <!-- Detailed analysis grid -->
-        <section class="grid" aria-label="Detailed security analysis">
-          <!-- Recent activity logs -->
-          <section class="panel">
-            <div class="panel-title">Recent Attack Activity (Last 25)</div>
-            <div class="table-wrap">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Username</th>
-                    <th>IP Address</th>
-                    <th>Status</th>
-                    <th>Threat Level</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for row in recent_attacks %}
-                    <tr>
-                      <td style="font-size: 12px; color: #9ca3af;">
-                        {{ row.timestamp[-19:] if row.timestamp|length > 19 else row.timestamp }}
-                      </td>
-                      <td>{{ row.username }}</td>
-                      <td style="font-family: monospace; font-size: 12px;"><a href="/dashboard/ip/{{ row.ip|urlencode }}" style="color: #93c5fd; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ row.ip }}</a></td>
-                      <td>
-                        <span class="pill {{ 'pill-success' if row.login_status == 'SUCCESS' else 'pill-danger' }}">
-                          {{ row.login_status }}
-                        </span>
-                      </td>
-                      <td>
-                        {% set tl = row.threat_level %}
-                        <span class="pill
-                          {{ 'pill-success' if tl == 'Safe' else ('pill-warn' if tl == 'Suspicious' else 'pill-danger') }}">
-                          {{ row.threat_level }}
-                        </span>
-                      </td>
-                    </tr>
-                  {% endfor %}
-
-                  {% if recent_attacks|length == 0 %}
-                    <tr>
-                      <td colspan="5" class="empty">No activity recorded yet.</td>
-                    </tr>
+          <div class="topbar-actions">
+            <!-- Notification Center -->
+            <div class="notification-center">
+              <button class="notif-btn" id="notif-btn" aria-label="Notifications" onclick="document.getElementById('notif-dropdown').classList.toggle('active')">
+                <i class="fa-regular fa-bell"></i>
+                {% set notif_count = recent_attacks|length if recent_attacks|length <= 5 else 5 %}
+                {% if notif_count > 0 %}
+                <span class="notif-badge">{{ notif_count }}</span>
+                {% endif %}
+              </button>
+              
+              <div class="notif-dropdown" id="notif-dropdown">
+                <div class="notif-header">
+                  <h3>Notifications</h3>
+                  <button class="notif-mark-read" onclick="document.querySelectorAll('.notif-unread-dot').forEach(el => el.style.display='none'); document.querySelector('.notif-badge').style.display='none';">Mark all as read</button>
+                </div>
+                <div class="notif-body">
+                  {% if recent_attacks and recent_attacks|length > 0 %}
+                    {% for attack in recent_attacks[:5] %}
+                      <div class="notif-item unread">
+                        <div class="notif-icon 
+                          {% if attack.ai_label == 'Threat' or attack.threat_level|int > 80 %}notif-critical
+                          {% elif attack.ai_label == 'Suspicious' or attack.threat_level|int > 50 %}notif-warning
+                          {% else %}notif-info{% endif %}">
+                          {% if attack.ai_label == 'Threat' or attack.threat_level|int > 80 %}
+                            <i class="fa-solid fa-shield-virus"></i>
+                          {% elif attack.ai_label == 'Suspicious' or attack.threat_level|int > 50 %}
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                          {% else %}
+                            <i class="fa-solid fa-circle-info"></i>
+                          {% endif %}
+                        </div>
+                        <div class="notif-content">
+                          <div class="notif-title">
+                            {% if 'ssh' in attack.service_route|lower %}SSH Honeypot Triggered
+                            {% elif 'db' in attack.service_route|lower or 'database' in attack.service_route|lower %}Database Access Attempt
+                            {% elif 'api' in attack.service_route|lower %}API Authentication Failure
+                            {% else %}Critical Threat Detected{% endif %}
+                          </div>
+                          <div class="notif-desc">
+                            {% if 'ssh' in attack.service_route|lower %}Connection recorded from suspicious IP.
+                            {% elif 'db' in attack.service_route|lower or 'database' in attack.service_route|lower %}Unauthorized database login detected.
+                            {% elif 'api' in attack.service_route|lower %}Unauthorized API request blocked.
+                            {% else %}Multiple failed login attempts detected.{% endif %}
+                          </div>
+                          <div class="notif-time">{{ attack.timestamp[-19:] if attack.timestamp|length > 19 else attack.timestamp }}</div>
+                        </div>
+                        <div class="notif-unread-dot"></div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="notif-empty">No new notifications</div>
                   {% endif %}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- Right panel: Statistics and top attackers -->
-          <section class="panel">
-            <div class="panel-title">Threat Distribution & Top Attackers</div>
-
-            <!-- Phase 6 Task 1: Blocked IP Management -->
-            <div id="blocked-ips" style="margin-bottom: 16px; padding: 10px; background: rgba(248,113,113,0.10); border-radius: 12px; border: 1px solid rgba(248,113,113,0.25);">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                <div style="color: #f87171; font-size: 11px; font-weight: 900;">🚫 BLOCKED IP MANAGEMENT</div>
-                <div style="color: #9ca3af; font-size: 11px;">
-                  Active blocks: <span style="color: #f87171; font-weight: 900;">{{ blocked_ip_count }}</span>
+                </div>
+                <div class="notif-footer">
+                  <a href="#" onclick="document.querySelector('[data-view=\'logs\']').click(); document.getElementById('notif-dropdown').classList.remove('active'); return false;">View all attack logs</a>
                 </div>
               </div>
-              {% if currently_blocked_ips|length > 0 %}
-                <div style="display: grid; gap: 6px; font-size: 12px;">
+            </div>
+
+            <div class="topbar-user">
+              <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+              <span>{{ username }}</span>
+            </div>
+            <a class="btn" href="/logout">
+              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true" style="margin-right:6px;"></i>
+              Logout
+            </a>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════
+             VIEW: DASHBOARD
+        ══════════════════════════════════════════════════════ -->
+        <div class="page-view active" id="view-dashboard">
+
+          <!-- KPI Cards -->
+          <section class="cards" aria-label="Key security metrics">
+
+            <div class="card" role="region" aria-label="Total login attempts">
+              <div class="card-header">
+                <div class="card-icon card-icon-blue" aria-hidden="true"><i class="fa-solid fa-right-to-bracket"></i></div>
+                <div class="card-label">Total Attempts</div>
+              </div>
+              <div class="card-value">{{ total_attempts }}</div>
+              <div class="indicator ok" style="margin-top:12px;">
+                <span class="light" aria-hidden="true"></span><span>Monitored</span>
+              </div>
+            </div>
+
+            <div class="card" role="region" aria-label="Failed login attempts">
+              <div class="card-header">
+                <div class="card-icon card-icon-red" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="card-label">Failed Logins</div>
+              </div>
+              <div class="card-value">{{ failed_logins }}</div>
+              {% if failed_logins >= 10 %}
+                <div class="indicator danger" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>High activity</span></div>
+              {% elif failed_logins >= 5 %}
+                <div class="indicator warn" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Elevated</span></div>
+              {% else %}
+                <div class="indicator ok" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Normal</span></div>
+              {% endif %}
+            </div>
+
+            <div class="card" role="region" aria-label="Threat alerts generated">
+              <div class="card-header">
+                <div class="card-icon card-icon-yellow" aria-hidden="true"><i class="fa-solid fa-bell"></i></div>
+                <div class="card-label">Threat Alerts</div>
+              </div>
+              <div class="card-value">{{ threat_alerts }}</div>
+              {% if threat_alerts >= 5 %}
+                <div class="indicator danger" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Active threats</span></div>
+              {% elif threat_alerts >= 2 %}
+                <div class="indicator warn" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Monitor closely</span></div>
+              {% else %}
+                <div class="indicator ok" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Secure</span></div>
+              {% endif %}
+            </div>
+
+            <div class="card" role="region" aria-label="Suspicious IP addresses">
+              <div class="card-header">
+                <div class="card-icon card-icon-red" aria-hidden="true"><i class="fa-solid fa-globe"></i></div>
+                <div class="card-label">Suspicious IPs</div>
+              </div>
+              <div class="card-value">{{ suspicious_ips }}</div>
+              {% if suspicious_ips >= 3 %}
+                <div class="indicator danger" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Pattern detected</span></div>
+              {% elif suspicious_ips > 0 %}
+                <div class="indicator warn" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Tracking</span></div>
+              {% else %}
+                <div class="indicator ok" style="margin-top:12px;"><span class="light" aria-hidden="true"></span><span>Clean</span></div>
+              {% endif %}
+            </div>
+
+            <div class="card" role="region" aria-label="AI threat assessment">
+              <div class="card-header">
+                <div class="card-icon card-icon-blue" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
+                <div class="card-label">AI Assessment</div>
+              </div>
+              <div class="card-value card-value-threat
+                {% if ai_threat_level == 'Critical' %}color-red
+                {% elif ai_threat_level == 'High' %}color-yellow
+                {% elif ai_threat_level == 'Medium' %}color-blue
+                {% else %}color-green{% endif %}" style="font-size:20px;letter-spacing:0.5px;">
+                {% if ai_threat_level == 'Critical' %}CRITICAL
+                {% elif ai_threat_level == 'High' %}HIGH
+                {% elif ai_threat_level == 'Medium' %}MEDIUM
+                {% else %}LOW{% endif %}
+              </div>
+              <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">ML-based assessment</div>
+            </div>
+
+          </section>
+
+          <!-- Main grid: activity + right panel -->
+          <section class="grid" aria-label="Detailed security analysis">
+
+            <!-- Left: recent activity -->
+            <section class="panel" id="activity-table">
+              <div class="panel-header">
+                <div class="panel-title">Recent Attack Activity — Last 25</div>
+                <div class="table-controls">
+                  <div class="search-wrap">
+                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                    <input id="dash-search" type="search" class="search-input" placeholder="Search by username or IP…" aria-label="Search attack logs" autocomplete="off" />
+                  </div>
+                  <div class="filter-bar" role="group" aria-label="Filter by service">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="ssh">SSH</button>
+                    <button class="filter-btn" data-filter="database">Database</button>
+                    <button class="filter-btn" data-filter="server">Server</button>
+                    <button class="filter-btn" data-filter="api">API</button>
+                  </div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Username</th>
+                      <th>IP Address</th>
+                      <th>Status</th>
+                      <th>Threat Level</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-tbody">
+                    {% for row in recent_attacks %}
+                      <tr data-username="{{ row.username | lower }}" data-ip="{{ row.ip | lower }}" data-service="{{ row.service_route | lower if row.service_route else '' }}">
+                        <td class="ts-cell">{{ row.timestamp[-19:] if row.timestamp|length > 19 else row.timestamp }}</td>
+                        <td>{{ row.username }}</td>
+                        <td><a class="ip-link" href="/dashboard/ip/{{ row.ip|urlencode }}" title="Investigate this IP">{{ row.ip }}</a></td>
+                        <td><span class="pill {{ 'pill-success' if row.login_status == 'SUCCESS' else 'pill-danger' }}">{{ row.login_status }}</span></td>
+                        <td>{% set tl = row.threat_level %}<span class="pill {{ 'pill-success' if tl == 'Safe' else ('pill-warn' if tl == 'Suspicious' else 'pill-danger') }}">{{ row.threat_level }}</span></td>
+                      </tr>
+                    {% endfor %}
+                    {% if recent_attacks|length == 0 %}
+                      <tr class="no-data-row"><td colspan="5" class="empty">No activity recorded yet.</td></tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+                <div id="dash-no-results" class="empty" style="display:none;padding:16px 12px;">No rows match your search or filter.</div>
+              </div>
+            </section>
+
+            <!-- Right: threat panel -->
+            <section class="panel">
+              <div class="panel-title">Threat Distribution &amp; Top Attackers</div>
+
+              <div id="blocked-ips" class="sub-panel sub-panel-red">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <div class="sub-panel-title" style="margin-bottom:0;">Blocked IP Management</div>
+                  <div style="font-size:11px;color:var(--text-subtle);">Active: <span class="color-red fw-bold">{{ blocked_ip_count }}</span></div>
+                </div>
+                {% if currently_blocked_ips|length > 0 %}
                   {% for row in currently_blocked_ips %}
-                    <div style="display: grid; grid-template-columns: 1fr auto auto auto auto auto; gap: 8px; align-items: center; padding: 8px; background: rgba(0,0,0,0.25); border: 1px solid rgba(248,113,113,0.30); border-radius: 8px;">
-                      <a href="/dashboard/ip/{{ row.ip|urlencode }}" style="font-family: monospace; color: #93c5fd; font-weight: 900; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ row.ip }}</a>
-                      <span style="color: #fbbf24;" title="failed_attempts">FA: {{ row.failed_attempts }}</span>
-                      <span style="color: #f87171;" title="threat_score">TS: {{ row.threat_score }}</span>
-                      <span style="color: #9ca3af;" title="blocked_until">until {{ row.blocked_until[-19:] if row.blocked_until and row.blocked_until|length > 19 else row.blocked_until }}</span>
-                      <span style="color: #60a5fa;" title="blocked_count">#{{ row.blocked_count }}</span>
+                    <div class="blocked-row">
+                      <a class="ip-link" href="/dashboard/ip/{{ row.ip|urlencode }}" title="Investigate this IP">{{ row.ip }}</a>
+                      <span class="color-yellow" title="failed_attempts">FA: {{ row.failed_attempts }}</span>
+                      <span class="color-red" title="threat_score">TS: {{ row.threat_score }}</span>
+                      <span class="color-muted" title="blocked_until">until {{ row.blocked_until[-19:] if row.blocked_until and row.blocked_until|length > 19 else row.blocked_until }}</span>
+                      <span class="color-blue" title="blocked_count">#{{ row.blocked_count }}</span>
                       <form method="POST" action="/dashboard/blocked-ips/{{ row.ip|urlencode }}/unblock" onsubmit="return confirm('Unblock {{ row.ip }}?');" style="margin:0;">
-                        <button type="submit" class="btn" style="padding: 4px 10px; font-size: 11px;">Unblock</button>
+                        <button type="submit" class="btn" style="padding:4px 10px;font-size:11px;">Unblock</button>
                       </form>
                     </div>
                   {% endfor %}
-                </div>
-              {% else %}
-                <div class="muted" style="font-size: 12px;">No active blocks.</div>
-              {% endif %}
-            </div>
+                {% else %}
+                  <div class="muted" style="font-size:12px;">No active blocks.</div>
+                {% endif %}
+              </div>
 
-            <!-- Threat level breakdown -->
-            <div style="margin-bottom: 16px; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 12px;">
-              <div style="color: #9ca3af; font-size: 11px; font-weight: 900; margin-bottom: 8px;">THREAT BREAKDOWN</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
-                <div>
-                  <div style="color: #34d399; font-weight: 900;">{{ threat_safe }}</div>
-                  <div style="color: #9ca3af; font-size: 10px;">Safe</div>
+              <div class="sub-panel sub-panel-neutral">
+                <div class="sub-panel-title">Threat Breakdown</div>
+                <div class="threat-grid">
+                  <div><div class="threat-cell-value color-green">{{ threat_safe }}</div><div class="threat-cell-label">Safe</div></div>
+                  <div><div class="threat-cell-value color-yellow">{{ threat_suspicious }}</div><div class="threat-cell-label">Suspicious</div></div>
+                  <div><div class="threat-cell-value color-red">{{ threat_threat }}</div><div class="threat-cell-label">Threat</div></div>
                 </div>
-                <div>
-                  <div style="color: #fbbf24; font-weight: 900;">{{ threat_suspicious }}</div>
-                  <div style="color: #9ca3af; font-size: 10px;">Suspicious</div>
-                </div>
-                <div>
-                  <div style="color: #f87171; font-weight: 900;">{{ threat_threat }}</div>
-                  <div style="color: #9ca3af; font-size: 10px;">Threat</div>
+                {% set _tt = (threat_safe + threat_suspicious + threat_threat) or 1 %}
+                <div class="threat-bars" style="margin-top:10px;">
+                  <div class="threat-bar-row">
+                    <span class="threat-bar-label color-green">Safe</span>
+                    <div class="bar-track" style="flex:1;"><div class="bar-fill-green" style="width:{{ (threat_safe * 100 / _tt)|round(1) }}%;"></div></div>
+                    <span class="threat-bar-pct color-muted">{{ (threat_safe * 100 / _tt)|round(0)|int }}%</span>
+                  </div>
+                  <div class="threat-bar-row">
+                    <span class="threat-bar-label color-yellow">Suspicious</span>
+                    <div class="bar-track" style="flex:1;"><div class="bar-fill-yellow" style="width:{{ (threat_suspicious * 100 / _tt)|round(1) }}%;"></div></div>
+                    <span class="threat-bar-pct color-muted">{{ (threat_suspicious * 100 / _tt)|round(0)|int }}%</span>
+                  </div>
+                  <div class="threat-bar-row">
+                    <span class="threat-bar-label color-red">Threat</span>
+                    <div class="bar-track" style="flex:1;"><div class="bar-fill-red" style="width:{{ (threat_threat * 100 / _tt)|round(1) }}%;"></div></div>
+                    <span class="threat-bar-pct color-muted">{{ (threat_threat * 100 / _tt)|round(0)|int }}%</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Top attacking IPs -->
-            <div style="padding: 10px; background: rgba(255,255,255,0.04); border-radius: 12px;">
-              <div style="color: #9ca3af; font-size: 11px; font-weight: 900; margin-bottom: 8px;">TOP ATTACKING IPs</div>
-              {% if top_attacking_ips|length > 0 %}
-                <div style="display: grid; gap: 6px; font-size: 12px;">
+              <div class="sub-panel sub-panel-neutral">
+                <div class="sub-panel-title">Top Attacking IPs</div>
+                {% if top_attacking_ips|length > 0 %}
                   {% for attacker in top_attacking_ips[:5] %}
-                    <div style="display: flex; justify-content: space-between; padding: 6px; background: rgba(248,113,113,0.08); border-radius: 8px; border: 1px solid rgba(248,113,113,0.20);">
-                      <a href="/dashboard/ip/{{ attacker.ip|urlencode }}" style="font-family: monospace; color: #60a5fa; text-decoration: none; border-bottom: 1px dashed rgba(96,165,250,0.5);" title="Investigate this IP">{{ attacker.ip }}</a>
-                      <span style="color: #f87171; font-weight: 900;">{{ attacker.attempt_count }} attempts</span>
+                    <div class="data-row">
+                      <a class="ip-link" href="/dashboard/ip/{{ attacker.ip|urlencode }}" title="Investigate this IP">{{ attacker.ip }}</a>
+                      <span class="color-red fw-bold">{{ attacker.attempt_count }} attempts</span>
                     </div>
                   {% endfor %}
+                {% else %}
+                  <div class="muted" style="font-size:12px;">No attacking IPs detected.</div>
+                {% endif %}
+              </div>
+
+              <div class="sub-panel sub-panel-blue">
+                <div class="sub-panel-title">Service Activity Summary</div>
+                {% if service_activity_distribution|length > 0 %}
+                  {% set _max_svc = namespace(v=1) %}
+                  {% for s in service_activity_distribution %}{% if s.attempt_count > _max_svc.v %}{% set _max_svc.v = s.attempt_count %}{% endif %}{% endfor %}
+                  {% for s in service_activity_distribution %}
+                    <div class="svc-bar-row">
+                      <span class="mono color-blue svc-bar-label" title="{{ s.service_route }}">{{ s.service_route }}</span>
+                      <div class="bar-track svc-bar-track"><div class="bar-fill-blue" style="width:{{ (s.attempt_count * 100 / _max_svc.v)|round(1) }}%;"></div></div>
+                      <span class="color-blue fw-bold svc-bar-count">{{ s.attempt_count }}</span>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="muted" style="font-size:12px;">No service activity recorded yet.</div>
+                {% endif %}
+              </div>
+
+            </section>
+          </section>
+
+          <div class="footer">
+            Smart Honeypot IDS &nbsp;·&nbsp; Flask + SQLite + Scikit-learn &nbsp;·&nbsp; AI-Enhanced Security Monitoring<br />
+            <span style="font-size:11px;">Last updated: {{ now }}</span>
+          </div>
+
+        </div><!-- /view-dashboard -->
+
+
+        <!-- ══════════════════════════════════════════════════════
+             VIEW: HONEYPOT SERVICES
+        ══════════════════════════════════════════════════════ -->
+        <div class="page-view" id="view-services">
+
+          <div class="view-header">
+            <div>
+              <div class="view-title">Honeypot Services</div>
+              <div class="view-sub">Monitored deception endpoints and service activity</div>
+            </div>
+            <div class="view-stat-chips">
+              <div class="stat-chip stat-chip-green">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <span>{{ service_activity_distribution|length }} Active Services</span>
+              </div>
+              <div class="stat-chip stat-chip-blue">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                <span>{{ total_attempts }} Total Connections</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Known service type cards -->
+          <div class="service-cards">
+
+            <!-- SSH -->
+            <div class="service-card">
+              <div class="service-card-header">
+                <div class="service-card-icon service-icon-blue" aria-hidden="true">
+                  <i class="fa-solid fa-terminal"></i>
                 </div>
-              {% else %}
-                <div class="muted">No attacking IPs detected.</div>
+                <div>
+                  <div class="service-card-name">SSH Honeypot</div>
+                  <div class="service-card-endpoint">Port 22 &nbsp;/&nbsp; TCP</div>
+                </div>
+                <div class="service-status-badge service-status-active">
+                  <span class="service-status-dot" aria-hidden="true"></span>Active
+                </div>
+              </div>
+              <div class="service-card-stats">
+                {% set _ssh_attempts = namespace(v=0) %}
+                {% set _ssh_failed   = namespace(v=0) %}
+                {% set _ssh_threats  = namespace(v=0) %}
+                {% for s in service_activity_distribution %}{% if 'ssh' in s.service_route|lower %}{% set _ssh_attempts.v = s.attempt_count %}{% endif %}{% endfor %}
+                {% for s in failed_attempts_by_service %}{% if 'ssh' in s.service_route|lower %}{% set _ssh_failed.v = s.failed_count %}{% endif %}{% endfor %}
+                {% for s in threat_counts_by_service %}{% if 'ssh' in s.service_route|lower %}{% set _ssh_threats.v = s.threat_count %}{% endif %}{% endfor %}
+                <div class="service-stat"><div class="service-stat-value color-blue">{{ _ssh_attempts.v }}</div><div class="service-stat-label">Connections</div></div>
+                <div class="service-stat"><div class="service-stat-value color-red">{{ _ssh_failed.v }}</div><div class="service-stat-label">Failed</div></div>
+                <div class="service-stat"><div class="service-stat-value color-yellow">{{ _ssh_threats.v }}</div><div class="service-stat-label">Threats</div></div>
+              </div>
+              {% if recent_attacks|length > 0 %}
+                <div class="service-card-footer">
+                  <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                  Last activity: {{ recent_attacks[0].timestamp[-19:] if recent_attacks[0].timestamp|length > 19 else recent_attacks[0].timestamp }}
+                </div>
               {% endif %}
             </div>
 
-            <!-- Enterprise multi-service metrics (Phase 2) -->
-            <div style="margin-top: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
-              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">SERVICE ACTIVITY (ENTERPRISE)</div>
-
-              <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+            <!-- Database -->
+            <div class="service-card">
+              <div class="service-card-header">
+                <div class="service-card-icon service-icon-yellow" aria-hidden="true">
+                  <i class="fa-solid fa-database"></i>
+                </div>
                 <div>
-                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Service activity distribution</div>
-                  {% if service_activity_distribution|length > 0 %}
+                  <div class="service-card-name">Database Honeypot</div>
+                  <div class="service-card-endpoint">Port 3306 &nbsp;/&nbsp; TCP</div>
+                </div>
+                <div class="service-status-badge service-status-active">
+                  <span class="service-status-dot" aria-hidden="true"></span>Active
+                </div>
+              </div>
+              <div class="service-card-stats">
+                {% set _db_attempts = namespace(v=0) %}
+                {% set _db_failed   = namespace(v=0) %}
+                {% set _db_threats  = namespace(v=0) %}
+                {% for s in service_activity_distribution %}{% if 'database' in s.service_route|lower or 'db' in s.service_route|lower %}{% set _db_attempts.v = s.attempt_count %}{% endif %}{% endfor %}
+                {% for s in failed_attempts_by_service %}{% if 'database' in s.service_route|lower or 'db' in s.service_route|lower %}{% set _db_failed.v = s.failed_count %}{% endif %}{% endfor %}
+                {% for s in threat_counts_by_service %}{% if 'database' in s.service_route|lower or 'db' in s.service_route|lower %}{% set _db_threats.v = s.threat_count %}{% endif %}{% endfor %}
+                <div class="service-stat"><div class="service-stat-value color-blue">{{ _db_attempts.v }}</div><div class="service-stat-label">Connections</div></div>
+                <div class="service-stat"><div class="service-stat-value color-red">{{ _db_failed.v }}</div><div class="service-stat-label">Failed</div></div>
+                <div class="service-stat"><div class="service-stat-value color-yellow">{{ _db_threats.v }}</div><div class="service-stat-label">Threats</div></div>
+              </div>
+              {% if recent_attacks|length > 0 %}
+                <div class="service-card-footer">
+                  <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                  Last activity: {{ recent_attacks[0].timestamp[-19:] if recent_attacks[0].timestamp|length > 19 else recent_attacks[0].timestamp }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- REST API -->
+            <div class="service-card">
+              <div class="service-card-header">
+                <div class="service-card-icon service-icon-green" aria-hidden="true">
+                  <i class="fa-solid fa-code"></i>
+                </div>
+                <div>
+                  <div class="service-card-name">REST API Honeypot</div>
+                  <div class="service-card-endpoint">/api/* &nbsp;/&nbsp; HTTP</div>
+                </div>
+                <div class="service-status-badge service-status-active">
+                  <span class="service-status-dot" aria-hidden="true"></span>Active
+                </div>
+              </div>
+              <div class="service-card-stats">
+                {% set _api_attempts = namespace(v=0) %}
+                {% set _api_failed   = namespace(v=0) %}
+                {% set _api_threats  = namespace(v=0) %}
+                {% for s in service_activity_distribution %}{% if 'api' in s.service_route|lower %}{% set _api_attempts.v = s.attempt_count %}{% endif %}{% endfor %}
+                {% for s in failed_attempts_by_service %}{% if 'api' in s.service_route|lower %}{% set _api_failed.v = s.failed_count %}{% endif %}{% endfor %}
+                {% for s in threat_counts_by_service %}{% if 'api' in s.service_route|lower %}{% set _api_threats.v = s.threat_count %}{% endif %}{% endfor %}
+                <div class="service-stat"><div class="service-stat-value color-blue">{{ _api_attempts.v }}</div><div class="service-stat-label">Connections</div></div>
+                <div class="service-stat"><div class="service-stat-value color-red">{{ _api_failed.v }}</div><div class="service-stat-label">Failed</div></div>
+                <div class="service-stat"><div class="service-stat-value color-yellow">{{ _api_threats.v }}</div><div class="service-stat-label">Threats</div></div>
+              </div>
+              {% if recent_attacks|length > 0 %}
+                <div class="service-card-footer">
+                  <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                  Last activity: {{ recent_attacks[0].timestamp[-19:] if recent_attacks[0].timestamp|length > 19 else recent_attacks[0].timestamp }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Web Server -->
+            <div class="service-card">
+              <div class="service-card-header">
+                <div class="service-card-icon service-icon-red" aria-hidden="true">
+                  <i class="fa-solid fa-globe"></i>
+                </div>
+                <div>
+                  <div class="service-card-name">Web Server Honeypot</div>
+                  <div class="service-card-endpoint">Port 80/443 &nbsp;/&nbsp; HTTP</div>
+                </div>
+                <div class="service-status-badge service-status-active">
+                  <span class="service-status-dot" aria-hidden="true"></span>Active
+                </div>
+              </div>
+              <div class="service-card-stats">
+                {% set _web_attempts = namespace(v=0) %}
+                {% set _web_failed   = namespace(v=0) %}
+                {% set _web_threats  = namespace(v=0) %}
+                {% for s in service_activity_distribution %}{% if 'server' in s.service_route|lower or 'web' in s.service_route|lower or 'http' in s.service_route|lower %}{% set _web_attempts.v = s.attempt_count %}{% endif %}{% endfor %}
+                {% for s in failed_attempts_by_service %}{% if 'server' in s.service_route|lower or 'web' in s.service_route|lower %}{% set _web_failed.v = s.failed_count %}{% endif %}{% endfor %}
+                {% for s in threat_counts_by_service %}{% if 'server' in s.service_route|lower or 'web' in s.service_route|lower %}{% set _web_threats.v = s.threat_count %}{% endif %}{% endfor %}
+                <div class="service-stat"><div class="service-stat-value color-blue">{{ _web_attempts.v }}</div><div class="service-stat-label">Connections</div></div>
+                <div class="service-stat"><div class="service-stat-value color-red">{{ _web_failed.v }}</div><div class="service-stat-label">Failed</div></div>
+                <div class="service-stat"><div class="service-stat-value color-yellow">{{ _web_threats.v }}</div><div class="service-stat-label">Threats</div></div>
+              </div>
+              {% if recent_attacks|length > 0 %}
+                <div class="service-card-footer">
+                  <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                  Last activity: {{ recent_attacks[0].timestamp[-19:] if recent_attacks[0].timestamp|length > 19 else recent_attacks[0].timestamp }}
+                </div>
+              {% endif %}
+            </div>
+
+          </div><!-- /service-cards -->
+
+          <!-- All services detail table -->
+          <div class="panel" style="margin-top:16px;">
+            <div class="panel-title">All Service Routes — Live Data</div>
+            {% if service_activity_distribution|length > 0 %}
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Service Route</th>
+                      <th>Total Attempts</th>
+                      <th>Failed Attempts</th>
+                      <th>Threat Count</th>
+                      <th>Activity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% set _max_svc2 = namespace(v=1) %}
+                    {% for s in service_activity_distribution %}{% if s.attempt_count > _max_svc2.v %}{% set _max_svc2.v = s.attempt_count %}{% endif %}{% endfor %}
                     {% for s in service_activity_distribution %}
-                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(96,165,250,0.10); border: 1px solid rgba(96,165,250,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
-                        <span style="font-family: monospace; color: #93c5fd;">{{ s.service_route }}</span>
-                        <span style="font-weight: 900; color: #60a5fa;">{{ s.attempt_count }} attempts</span>
-                      </div>
+                      {% set _svc_failed = namespace(v=0) %}
+                      {% set _svc_thr    = namespace(v=0) %}
+                      {% for f in failed_attempts_by_service %}{% if f.service_route == s.service_route %}{% set _svc_failed.v = f.failed_count %}{% endif %}{% endfor %}
+                      {% for t in threat_counts_by_service %}{% if t.service_route == s.service_route %}{% set _svc_thr.v = t.threat_count %}{% endif %}{% endfor %}
+                      <tr>
+                        <td><span class="mono color-blue">{{ s.service_route }}</span></td>
+                        <td class="fw-bold">{{ s.attempt_count }}</td>
+                        <td class="color-red">{{ _svc_failed.v }}</td>
+                        <td class="color-yellow">{{ _svc_thr.v }}</td>
+                        <td style="width:160px;">
+                          <div class="bar-track" style="height:6px;">
+                            <div class="bar-fill-blue" style="width:{{ (s.attempt_count * 100 / _max_svc2.v)|round(1) }}%;"></div>
+                          </div>
+                        </td>
+                      </tr>
                     {% endfor %}
-                  {% else %}
-                    <div class="muted">No service activity recorded yet.</div>
-                  {% endif %}
-                </div>
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty">No service data recorded yet.</div>
+            {% endif %}
+          </div>
 
-                <div>
-                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Top attacked services (failed attempts)</div>
-                  {% if top_attacked_services|length > 0 %}
-                    {% for s in top_attacked_services %}
-                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
-                        <span style="font-family: monospace; color: #60a5fa;">{{ s.service_route }}</span>
-                        <span style="font-weight: 900; color: #f87171;">{{ s.failed_count }} failed</span>
-                      </div>
-                    {% endfor %}
-                  {% else %}
-                    <div class="muted">No failed service attempts recorded yet.</div>
-                  {% endif %}
-                </div>
+        </div><!-- /view-services -->
 
-                <div>
-                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Failed attempts by service</div>
-                  {% if failed_attempts_by_service|length > 0 %}
-                    {% for s in failed_attempts_by_service %}
-                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
-                        <span style="font-family: monospace; color: #93c5fd;">{{ s.service_route }}</span>
-                        <span style="font-weight: 900; color: #f87171;">{{ s.failed_count }} failed</span>
-                      </div>
-                    {% endfor %}
-                  {% else %}
-                    <div class="muted">No failed attempts recorded.</div>
-                  {% endif %}
-                </div>
 
-                <div>
-                  <div style="color: #9ca3af; font-size: 10px; font-weight: 900; margin-bottom: 6px;">Threat counts by service (heuristic)</div>
-                  {% if threat_counts_by_service|length > 0 %}
-                    {% for s in threat_counts_by_service %}
-                      <div style="display:flex; justify-content:space-between; padding:6px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.20); border-radius: 10px; margin-bottom: 6px; font-size: 12px;">
-                        <span style="font-family: monospace; color: #fbbf24;">{{ s.service_route }}</span>
-                        <span style="font-weight: 900; color: #fbbf24;">{{ s.threat_count }} threats</span>
-                      </div>
-                    {% endfor %}
-                  {% else %}
-                    <div class="muted">No threat-to-service correlation available.</div>
-                  {% endif %}
+        <!-- ══════════════════════════════════════════════════════
+             VIEW: ATTACK LOGS
+        ══════════════════════════════════════════════════════ -->
+        <div class="page-view" id="view-logs">
+
+          <div class="view-header">
+            <div>
+              <div class="view-title">Attack Logs</div>
+              <div class="view-sub">Complete attack event log — last 25 recorded events</div>
+            </div>
+            <div class="view-stat-chips">
+              <div class="stat-chip stat-chip-red">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <span>{{ failed_logins }} Failed</span>
+              </div>
+              <div class="stat-chip stat-chip-blue">
+                <i class="fa-solid fa-list-ul" aria-hidden="true"></i>
+                <span>{{ recent_attacks|length }} Entries Shown</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Event Log</div>
+              <div class="table-controls">
+                <div class="search-wrap">
+                  <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                  <input id="logs-search" type="search" class="search-input" placeholder="Search username, IP, service…" aria-label="Search attack logs" autocomplete="off" />
+                </div>
+                <div class="filter-bar" role="group" aria-label="Filter by service">
+                  <button class="logs-filter-btn filter-btn active" data-filter="all">All</button>
+                  <button class="logs-filter-btn filter-btn" data-filter="ssh">SSH</button>
+                  <button class="logs-filter-btn filter-btn" data-filter="database">Database</button>
+                  <button class="logs-filter-btn filter-btn" data-filter="server">Server</button>
+                  <button class="logs-filter-btn filter-btn" data-filter="api">API</button>
+                </div>
+                <div class="filter-bar" role="group" aria-label="Filter by status">
+                  <button class="logs-status-btn filter-btn active" data-status="all">All Status</button>
+                  <button class="logs-status-btn filter-btn" data-status="success">Success</button>
+                  <button class="logs-status-btn filter-btn" data-status="fail">Failed</button>
                 </div>
               </div>
             </div>
 
-            <!-- Monitoring information -->
-            <div style="margin-top: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
-              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">ℹ️ ABOUT THIS DASHBOARD</div>
-              <div style="color: #9ca3af; font-size: 11px; line-height: 1.5;">
-                Real-time monitoring of login attempts, AI-powered threat detection, and brute-force pattern analysis. Data refreshes automatically. Click "Admin Login" to test the honeypot.
+            <div class="table-wrap">
+              <table class="table" id="logs-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>IP Address</th>
+                    <th>Username</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Threat Level</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="logs-tbody">
+                  {% for row in recent_attacks %}
+                    <tr
+                      data-username="{{ row.username | lower }}"
+                      data-ip="{{ row.ip | lower }}"
+                      data-service="{{ row.service_route | lower if row.service_route else '' }}"
+                      data-status="{{ 'success' if row.login_status == 'SUCCESS' else 'fail' }}"
+                    >
+                      <td class="ts-cell">{{ row.timestamp[-19:] if row.timestamp|length > 19 else row.timestamp }}</td>
+                      <td><a class="ip-link" href="/dashboard/ip/{{ row.ip|urlencode }}" title="Investigate this IP">{{ row.ip }}</a></td>
+                      <td class="mono" style="font-size:13px;">{{ row.username }}</td>
+                      <td><span class="mono color-blue" style="font-size:12px;">{{ row.service_route if row.service_route else '—' }}</span></td>
+                      <td><span class="pill {{ 'pill-success' if row.login_status == 'SUCCESS' else 'pill-danger' }}">{{ row.login_status }}</span></td>
+                      <td>{% set tl = row.threat_level %}<span class="pill {{ 'pill-success' if tl == 'Safe' else ('pill-warn' if tl == 'Suspicious' else 'pill-danger') }}">{{ row.threat_level }}</span></td>
+                      <td><a class="btn" href="/dashboard/ip/{{ row.ip|urlencode }}" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a></td>
+                    </tr>
+                  {% endfor %}
+                  {% if recent_attacks|length == 0 %}
+                    <tr class="no-data-row"><td colspan="7" class="empty">No attack events recorded yet.</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+              <div id="logs-no-results" class="empty" style="display:none;padding:16px 12px;">No rows match your search or filter.</div>
+            </div>
+          </div>
+
+          <!-- Summary stats -->
+          <div class="grid" style="margin-top:14px;">
+            <div class="panel">
+              <div class="panel-title">Top Attacking IPs</div>
+              {% if top_attacking_ips|length > 0 %}
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead><tr><th>IP Address</th><th>Attempts</th><th>Activity</th></tr></thead>
+                    <tbody>
+                      {% set _max_ip = namespace(v=1) %}
+                      {% for a in top_attacking_ips %}{% if a.attempt_count > _max_ip.v %}{% set _max_ip.v = a.attempt_count %}{% endif %}{% endfor %}
+                      {% for attacker in top_attacking_ips %}
+                        <tr>
+                          <td><a class="ip-link" href="/dashboard/ip/{{ attacker.ip|urlencode }}" title="Investigate">{{ attacker.ip }}</a></td>
+                          <td class="color-red fw-bold">{{ attacker.attempt_count }}</td>
+                          <td style="width:120px;"><div class="bar-track" style="height:6px;"><div class="bar-fill-red" style="width:{{ (attacker.attempt_count * 100 / _max_ip.v)|round(1) }}%;"></div></div></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="empty">No attacking IPs detected.</div>
+              {% endif %}
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Blocked IPs</div>
+              {% if currently_blocked_ips|length > 0 %}
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead><tr><th>IP Address</th><th>Failed</th><th>Score</th><th>Action</th></tr></thead>
+                    <tbody>
+                      {% for row in currently_blocked_ips %}
+                        <tr>
+                          <td><a class="ip-link" href="/dashboard/ip/{{ row.ip|urlencode }}" title="Investigate">{{ row.ip }}</a></td>
+                          <td class="color-yellow">{{ row.failed_attempts }}</td>
+                          <td class="color-red fw-bold">{{ row.threat_score }}</td>
+                          <td>
+                            <form method="POST" action="/dashboard/blocked-ips/{{ row.ip|urlencode }}/unblock" onsubmit="return confirm('Unblock {{ row.ip }}?');" style="margin:0;">
+                              <button type="submit" class="btn" style="padding:4px 10px;font-size:11px;">Unblock</button>
+                            </form>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="empty">No active IP blocks.</div>
+              {% endif %}
+            </div>
+          </div>
+
+        </div><!-- /view-logs -->
+
+
+        <!-- ══════════════════════════════════════════════════════
+             VIEW: REPORTS
+        ══════════════════════════════════════════════════════ -->
+        <div class="page-view" id="view-reports">
+
+          <!-- View header -->
+          <div class="view-header">
+            <div>
+              <div class="view-title">Security Reports Center</div>
+              <div class="view-sub">Generate, export and manage security intelligence reports</div>
+            </div>
+            <div class="view-stat-chips">
+              <div class="stat-chip stat-chip-green">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <span>Export Ready</span>
+              </div>
+              <div class="stat-chip stat-chip-blue">
+                <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+                <span>{{ now }}</span>
               </div>
             </div>
-          </section>
-        </section>
+          </div>
 
-        <!-- Phase 6 Task 3: Export Reports -->
-        <section class="grid" aria-label="Export reports" style="margin-top: 18px;">
-          <section class="panel">
-            <div class="panel-title">Export Reports</div>
-            <div style="padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
-              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📤 CSV EXPORTS</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: 12px;">
-                <a class="btn" href="/dashboard/export/login_attempts.csv" download>login_attempts.csv</a>
-                <a class="btn" href="/dashboard/export/threat_alerts.csv" download>threat_alerts.csv</a>
-                <a class="btn" href="/dashboard/export/suspicious_ips.csv" download>suspicious_ips.csv</a>
+          <!-- ── Section 1: Executive Security Report ────────── -->
+          <div class="exec-report-card" role="region" aria-label="Executive security report">
+            <div class="exec-report-left">
+              <div class="exec-report-badge">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              </div>
+              <div class="exec-report-meta">
+                <div class="exec-report-eyebrow">Executive Report</div>
+                <div class="exec-report-title">Security Report PDF</div>
+                <div class="exec-report-desc">
+                  A multi-section executive summary covering all monitored threat activity.
+                  Includes AI-powered analysis, service statistics, and actionable intelligence for security teams.
+                </div>
+                <div class="exec-report-contents">
+                  <div class="exec-report-contents-label">Report Contents</div>
+                  <div class="exec-contents-grid">
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                      <span>Login Attempts</span>
+                    </div>
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                      <span>Threat Alerts</span>
+                    </div>
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                      <span>Top Attacking IPs</span>
+                    </div>
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-brain" aria-hidden="true"></i>
+                      <span>AI Threat Analysis</span>
+                    </div>
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-server" aria-hidden="true"></i>
+                      <span>Service Statistics</span>
+                    </div>
+                    <div class="exec-content-item">
+                      <i class="fa-solid fa-ban" aria-hidden="true"></i>
+                      <span>Blocked IPs</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div style="margin-top: 10px; padding: 10px; background: rgba(248,113,113,0.08); border-radius: 12px; border: 1px solid rgba(248,113,113,0.20);">
-              <div style="color: #f87171; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📄 PDF SECURITY REPORT</div>
-              <a class="btn" href="/dashboard/export/report.pdf" download style="display:inline-block; padding: 10px 14px; font-weight: 900; background: linear-gradient(180deg, rgba(248,113,113,1), rgba(248,113,113,0.78)); color: #07121f;">Download full report (PDF)</a>
-              <div style="color: #9ca3af; font-size: 11px; margin-top: 6px;">
-                Multi-section report: headline metrics, threat distribution, top attackers, top usernames, failure reasons, blocked IPs, recent activity.
+            <div class="exec-report-right">
+              <div class="exec-kpi-row">
+                <div class="exec-kpi">
+                  <div class="exec-kpi-value">{{ total_attempts }}</div>
+                  <div class="exec-kpi-label">Login Events</div>
+                </div>
+                <div class="exec-kpi">
+                  <div class="exec-kpi-value color-red">{{ threat_alerts }}</div>
+                  <div class="exec-kpi-label">Threat Alerts</div>
+                </div>
+                <div class="exec-kpi">
+                  <div class="exec-kpi-value color-yellow">{{ blocked_ip_count }}</div>
+                  <div class="exec-kpi-label">Blocked IPs</div>
+                </div>
+              </div>
+              <div class="exec-threat-level">
+                <div class="exec-threat-label">Current AI Threat Level</div>
+                <div class="exec-threat-value
+                  {% if ai_threat_level == 'Critical' %}color-red
+                  {% elif ai_threat_level == 'High' %}color-yellow
+                  {% elif ai_threat_level == 'Medium' %}color-blue
+                  {% else %}color-green{% endif %}">
+                  {% if ai_threat_level == 'Critical' %}CRITICAL
+                  {% elif ai_threat_level == 'High' %}HIGH
+                  {% elif ai_threat_level == 'Medium' %}MEDIUM
+                  {% else %}LOW{% endif %}
+                </div>
+              </div>
+              <a class="btn exec-report-btn" href="/dashboard/export/report.pdf" download>
+                <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                Generate PDF Report
+              </a>
+              <div class="exec-report-note">
+                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                Compiled on demand using live data
               </div>
             </div>
-          </section>
-        </section>
+          </div>
 
-        <!-- Phase 6 Task 2: Advanced Analytics -->
-        <section class="grid" aria-label="Advanced security analytics" style="margin-top: 18px;">
-          <section class="panel">
-            <div class="panel-title">Advanced Analytics</div>
+          <!-- ── Section 2: CSV Exports ──────────────────────── -->
+          <div class="rpt-section-label">
+            <i class="fa-solid fa-file-csv" aria-hidden="true"></i>
+            CSV Data Exports
+          </div>
 
-            <!-- A1: Hourly attempt volume (24h) -->
-            <div style="margin-bottom: 14px; padding: 10px; background: rgba(96,165,250,0.08); border-radius: 12px; border: 1px solid rgba(96,165,250,0.20);">
-              <div style="color: #60a5fa; font-size: 11px; font-weight: 900; margin-bottom: 6px;">📈 HOURLY ATTEMPT VOLUME (24h)</div>
+          <div class="csv-export-grid">
+
+            <!-- Login Attempts CSV -->
+            <div class="csv-card">
+              <div class="csv-card-header">
+                <div class="csv-card-icon csv-icon-blue" aria-hidden="true">
+                  <i class="fa-solid fa-right-to-bracket"></i>
+                </div>
+                <div class="csv-card-type-badge">CSV</div>
+              </div>
+              <div class="csv-card-title">Login Attempts</div>
+              <div class="csv-card-desc">Complete login attempt log with timestamps, IP addresses, usernames, service routes, and authentication outcomes.</div>
+              <div class="csv-card-stats">
+                <div class="csv-stat">
+                  <div class="csv-stat-value">{{ total_attempts }}</div>
+                  <div class="csv-stat-label">Total Records</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-red">{{ failed_logins }}</div>
+                  <div class="csv-stat-label">Failed</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-green">{{ total_attempts - failed_logins }}</div>
+                  <div class="csv-stat-label">Successful</div>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-file-info">
+                  <i class="fa-solid fa-file" aria-hidden="true"></i>
+                  <span class="mono" style="font-size:11px;">login_attempts.csv</span>
+                </div>
+                <a class="btn" href="/dashboard/export/login_attempts.csv" download>
+                  <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:5px;"></i>Download
+                </a>
+              </div>
+            </div>
+
+            <!-- Threat Alerts CSV -->
+            <div class="csv-card">
+              <div class="csv-card-header">
+                <div class="csv-card-icon csv-icon-yellow" aria-hidden="true">
+                  <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="csv-card-type-badge">CSV</div>
+              </div>
+              <div class="csv-card-title">Threat Alerts</div>
+              <div class="csv-card-desc">All AI-generated threat alerts with severity classifications, source IPs, detection timestamps, and threat scores.</div>
+              <div class="csv-card-stats">
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-yellow">{{ threat_alerts }}</div>
+                  <div class="csv-stat-label">Total Alerts</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-red">{{ threat_threat }}</div>
+                  <div class="csv-stat-label">Critical</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-yellow">{{ threat_suspicious }}</div>
+                  <div class="csv-stat-label">Suspicious</div>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-file-info">
+                  <i class="fa-solid fa-file" aria-hidden="true"></i>
+                  <span class="mono" style="font-size:11px;">threat_alerts.csv</span>
+                </div>
+                <a class="btn" href="/dashboard/export/threat_alerts.csv" download>
+                  <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:5px;"></i>Download
+                </a>
+              </div>
+            </div>
+
+            <!-- Suspicious IPs CSV -->
+            <div class="csv-card">
+              <div class="csv-card-header">
+                <div class="csv-card-icon csv-icon-red" aria-hidden="true">
+                  <i class="fa-solid fa-globe"></i>
+                </div>
+                <div class="csv-card-type-badge">CSV</div>
+              </div>
+              <div class="csv-card-title">Suspicious IPs</div>
+              <div class="csv-card-desc">Flagged IP addresses with associated threat scores, failed attempt counts, block history, and last seen timestamps.</div>
+              <div class="csv-card-stats">
+                <div class="csv-stat">
+                  <div class="csv-stat-value">{{ suspicious_ips }}</div>
+                  <div class="csv-stat-label">Flagged IPs</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value color-red">{{ blocked_ip_count }}</div>
+                  <div class="csv-stat-label">Blocked</div>
+                </div>
+                <div class="csv-stat">
+                  <div class="csv-stat-value">{{ top_attacking_ips|length }}</div>
+                  <div class="csv-stat-label">Top Attackers</div>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-file-info">
+                  <i class="fa-solid fa-file" aria-hidden="true"></i>
+                  <span class="mono" style="font-size:11px;">suspicious_ips.csv</span>
+                </div>
+                <a class="btn" href="/dashboard/export/suspicious_ips.csv" download>
+                  <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:5px;"></i>Download
+                </a>
+              </div>
+            </div>
+
+          </div><!-- /csv-export-grid -->
+
+          <!-- ── Section 3: Report Summary Stats ────────────── -->
+          <div class="rpt-section-label" style="margin-top:24px;">
+            <i class="fa-solid fa-chart-bar" aria-hidden="true"></i>
+            Report Summary
+          </div>
+
+          <div class="rpt-summary-row">
+            <div class="rpt-summary-card">
+              <div class="rpt-summary-icon rpt-icon-blue" aria-hidden="true">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <div class="rpt-summary-body">
+                <div class="rpt-summary-value">4</div>
+                <div class="rpt-summary-label">Total Reports Available</div>
+                <div class="rpt-summary-sub">3 CSV &nbsp;·&nbsp; 1 PDF</div>
+              </div>
+            </div>
+
+            <div class="rpt-summary-card">
+              <div class="rpt-summary-icon rpt-icon-green" aria-hidden="true">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="rpt-summary-body">
+                <div class="rpt-summary-value" style="font-size:13px;font-weight:700;">{{ now }}</div>
+                <div class="rpt-summary-label">Latest Data Snapshot</div>
+                <div class="rpt-summary-sub">Auto-refreshes every 30s</div>
+              </div>
+            </div>
+
+            <div class="rpt-summary-card">
+              <div class="rpt-summary-icon rpt-icon-yellow" aria-hidden="true">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div class="rpt-summary-body">
+                <div class="rpt-summary-value color-yellow">{{ threat_alerts }}</div>
+                <div class="rpt-summary-label">Threat Alerts in Dataset</div>
+                <div class="rpt-summary-sub">AI classification active</div>
+              </div>
+            </div>
+
+            <div class="rpt-summary-card">
+              <div class="rpt-summary-icon rpt-icon-green" aria-hidden="true">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="rpt-summary-body">
+                <div class="rpt-summary-value color-green">Ready</div>
+                <div class="rpt-summary-label">Export Status</div>
+                <div class="rpt-summary-sub">All formats available</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Section 4: Recent Reports table ────────────── -->
+          <div class="rpt-section-label" style="margin-top:24px;">
+            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+            Recent Reports
+          </div>
+
+          <div class="panel">
+            <div class="table-wrap">
+              <table class="table" id="recent-reports-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th>
+                    <th>Type</th>
+                    <th>Generated</th>
+                    <th>Est. Size</th>
+                    <th>Status</th>
+                    <th>Download</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- PDF report row -->
+                  <tr>
+                    <td>
+                      <div class="rpt-file-cell">
+                        <div class="rpt-file-icon rpt-file-pdf" aria-hidden="true">
+                          <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+                        <span class="mono" style="font-size:12px;">report.pdf</span>
+                      </div>
+                    </td>
+                    <td><span class="pill pill-danger" style="font-size:10px;">PDF</span></td>
+                    <td class="ts-cell">On demand</td>
+                    <td class="color-muted" style="font-size:12px;">Dynamic</td>
+                    <td><span class="pill pill-success" style="font-size:10px;">Ready</span></td>
+                    <td>
+                      <a class="btn" href="/dashboard/export/report.pdf" download style="padding:4px 12px;font-size:11px;">
+                        <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:4px;"></i>Download
+                      </a>
+                    </td>
+                  </tr>
+                  <!-- Login Attempts CSV row -->
+                  <tr>
+                    <td>
+                      <div class="rpt-file-cell">
+                        <div class="rpt-file-icon rpt-file-csv rpt-file-blue" aria-hidden="true">
+                          <i class="fa-solid fa-file-csv"></i>
+                        </div>
+                        <span class="mono" style="font-size:12px;">login_attempts.csv</span>
+                      </div>
+                    </td>
+                    <td><span class="pill pill-okay" style="font-size:10px;">CSV</span></td>
+                    <td class="ts-cell">{{ now }}</td>
+                    <td class="color-muted" style="font-size:12px;">~{{ total_attempts * 0.12 | round(0) | int }} KB</td>
+                    <td><span class="pill pill-success" style="font-size:10px;">Ready</span></td>
+                    <td>
+                      <a class="btn" href="/dashboard/export/login_attempts.csv" download style="padding:4px 12px;font-size:11px;">
+                        <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:4px;"></i>Download
+                      </a>
+                    </td>
+                  </tr>
+                  <!-- Threat Alerts CSV row -->
+                  <tr>
+                    <td>
+                      <div class="rpt-file-cell">
+                        <div class="rpt-file-icon rpt-file-csv rpt-file-yellow" aria-hidden="true">
+                          <i class="fa-solid fa-file-csv"></i>
+                        </div>
+                        <span class="mono" style="font-size:12px;">threat_alerts.csv</span>
+                      </div>
+                    </td>
+                    <td><span class="pill pill-okay" style="font-size:10px;">CSV</span></td>
+                    <td class="ts-cell">{{ now }}</td>
+                    <td class="color-muted" style="font-size:12px;">~{{ threat_alerts * 0.18 | round(0) | int }} KB</td>
+                    <td><span class="pill pill-success" style="font-size:10px;">Ready</span></td>
+                    <td>
+                      <a class="btn" href="/dashboard/export/threat_alerts.csv" download style="padding:4px 12px;font-size:11px;">
+                        <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:4px;"></i>Download
+                      </a>
+                    </td>
+                  </tr>
+                  <!-- Suspicious IPs CSV row -->
+                  <tr>
+                    <td>
+                      <div class="rpt-file-cell">
+                        <div class="rpt-file-icon rpt-file-csv rpt-file-red" aria-hidden="true">
+                          <i class="fa-solid fa-file-csv"></i>
+                        </div>
+                        <span class="mono" style="font-size:12px;">suspicious_ips.csv</span>
+                      </div>
+                    </td>
+                    <td><span class="pill pill-okay" style="font-size:10px;">CSV</span></td>
+                    <td class="ts-cell">{{ now }}</td>
+                    <td class="color-muted" style="font-size:12px;">~{{ suspicious_ips * 0.22 | round(0) | int }} KB</td>
+                    <td><span class="pill pill-success" style="font-size:10px;">Ready</span></td>
+                    <td>
+                      <a class="btn" href="/dashboard/export/suspicious_ips.csv" download style="padding:4px 12px;font-size:11px;">
+                        <i class="fa-solid fa-download" aria-hidden="true" style="margin-right:4px;"></i>Download
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /view-reports -->
+
+
+        <!-- ══════════════════════════════════════════════════════
+             VIEW: ANALYTICS
+        ══════════════════════════════════════════════════════ -->
+        <div class="page-view" id="view-analytics">
+
+          <!-- Header -->
+          <div class="view-header">
+            <div>
+              <div class="view-title">Analytics Center</div>
+              <div class="view-sub">Security intelligence, trend analysis, and AI-powered threat assessment</div>
+            </div>
+            <div class="view-stat-chips">
+              <div class="stat-chip stat-chip-blue">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                <span>{{ hourly_attempt_volume|length }}h window</span>
+              </div>
+              <div class="stat-chip stat-chip-{% if ai_threat_level == 'Critical' or ai_threat_level == 'High' %}red{% elif ai_threat_level == 'Medium' %}yellow{% else %}green{% endif %}">
+                <i class="fa-solid fa-brain" aria-hidden="true"></i>
+                <span>AI: {% if ai_threat_level == 'Critical' %}CRITICAL{% elif ai_threat_level == 'High' %}HIGH{% elif ai_threat_level == 'Medium' %}MEDIUM{% else %}LOW{% endif %}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Row 1: Attack Trend (wide) + AI Assessment ──── -->
+          <div class="anlx-row anlx-row-7-5">
+
+            <!-- Panel 1 – Attack Trend Chart -->
+            <div class="panel anlx-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-chart-column anlx-panel-icon color-blue" aria-hidden="true"></i>
+                  Attack Trend — Last 24 Hours
+                </div>
+                <div class="anlx-legend">
+                  <span class="anlx-legend-item">
+                    <span class="anlx-legend-dot" style="background:var(--accent);"></span>Total
+                  </span>
+                  <span class="anlx-legend-item">
+                    <span class="anlx-legend-dot" style="background:var(--color-red);"></span>Failed
+                  </span>
+                </div>
+              </div>
               {% if hourly_attempt_volume|length > 0 %}
-                <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 12px;">
-                  {% set _max_attempts = 1 %}
-                  {% for row in hourly_attempt_volume %}
-                    {% if row.attempts > _max_attempts %}{% set _max_attempts = row.attempts %}{% endif %}
-                  {% endfor %}
-                  {% for row in hourly_attempt_volume %}
-                    <div style="display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; align-items: center;">
-                      <span style="color: #9ca3af; font-family: monospace; font-size: 11px;">{{ row.hour[-5:] }}</span>
-                      <div style="background: rgba(0,0,0,0.25); border-radius: 6px; height: 10px; position: relative; overflow: hidden;">
-                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (row.attempts * 100 / _max_attempts)|round(1) }}%; background: linear-gradient(90deg, rgba(96,165,250,0.85), rgba(96,165,250,0.55));"></div>
-                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (row.failed * 100 / _max_attempts)|round(1) }}%; background: linear-gradient(90deg, rgba(248,113,113,0.85), rgba(248,113,113,0.55));"></div>
+                {% set _max_hr = namespace(v=1) %}
+                {% for row in hourly_attempt_volume %}{% if row.attempts > _max_hr.v %}{% set _max_hr.v = row.attempts %}{% endif %}{% endfor %}
+                <div class="anlx-chart-wrap">
+                  <div class="anlx-chart-bars">
+                    {% for row in hourly_attempt_volume %}
+                      <div class="anlx-bar-col" title="{{ row.hour[-5:] }}: {{ row.attempts }} attempts, {{ row.failed }} failed">
+                        <div class="anlx-bar-inner">
+                          <div class="anlx-bar-total" style="height:{{ [((row.attempts * 100 / _max_hr.v)|round(0)|int), 2]|max }}%;"></div>
+                          <div class="anlx-bar-failed" style="height:{{ [((row.failed * 100 / _max_hr.v)|round(0)|int), 2]|max }}%;"></div>
+                        </div>
+                        <div class="anlx-bar-label">{{ row.hour[-5:] }}</div>
                       </div>
-                      <span style="color: #93c5fd; font-weight: 900; min-width: 60px; text-align: right;">{{ row.attempts }} <span style="color: #f87171; font-weight: 500;">({{ row.failed }} fail)</span></span>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div class="anlx-chart-footer">
+                  <span class="color-blue fw-bold">Peak: {{ _max_hr.v }} attempts/hr</span>
+                  <span class="color-muted">·</span>
+                  {% set _total_hr = namespace(v=0) %}
+                  {% for row in hourly_attempt_volume %}{% set _total_hr.v = _total_hr.v + row.attempts %}{% endfor %}
+                  <span class="color-muted">{{ _total_hr.v }} total in window</span>
+                </div>
+              {% else %}
+                <div class="anlx-empty">
+                  <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+                  <span>No hourly data available yet.</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Panel 2 – AI Threat Assessment -->
+            <div class="panel anlx-panel anlx-ai-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-brain anlx-panel-icon color-blue" aria-hidden="true"></i>
+                  AI Threat Assessment
+                </div>
+              </div>
+
+              <!-- Current level badge -->
+              <div class="anlx-threat-badge
+                {% if ai_threat_level == 'Critical' %}anlx-badge-critical
+                {% elif ai_threat_level == 'High' %}anlx-badge-high
+                {% elif ai_threat_level == 'Medium' %}anlx-badge-medium
+                {% else %}anlx-badge-low{% endif %}">
+                <div class="anlx-badge-dot" aria-hidden="true"></div>
+                <div class="anlx-badge-label">
+                  {% if ai_threat_level == 'Critical' %}CRITICAL
+                  {% elif ai_threat_level == 'High' %}HIGH
+                  {% elif ai_threat_level == 'Medium' %}MEDIUM
+                  {% else %}LOW{% endif %}
+                </div>
+                <div class="anlx-badge-sub">Current Threat Level</div>
+              </div>
+
+              <!-- Signal bars -->
+              <div class="anlx-signal-grid">
+                <div class="anlx-signal-item">
+                  <div class="anlx-signal-value">{{ total_attempts }}</div>
+                  <div class="anlx-signal-label">Login Events</div>
+                </div>
+                <div class="anlx-signal-item">
+                  <div class="anlx-signal-value color-red">{{ failed_logins }}</div>
+                  <div class="anlx-signal-label">Failed Auth</div>
+                </div>
+                <div class="anlx-signal-item">
+                  <div class="anlx-signal-value color-yellow">{{ threat_alerts }}</div>
+                  <div class="anlx-signal-label">Alerts</div>
+                </div>
+                <div class="anlx-signal-item">
+                  <div class="anlx-signal-value color-red">{{ blocked_ip_count }}</div>
+                  <div class="anlx-signal-label">Blocked</div>
+                </div>
+              </div>
+
+              <!-- Risk scoring bars -->
+              <div class="anlx-risk-bars">
+                {% set _tt3 = (threat_safe + threat_suspicious + threat_threat) or 1 %}
+                <div class="anlx-risk-label-row">
+                  <span class="color-muted" style="font-size:11px;">Threat composition</span>
+                </div>
+                <div class="anlx-risk-row">
+                  <span class="anlx-risk-name color-green">Safe</span>
+                  <div class="bar-track" style="flex:1;"><div class="bar-fill-green" style="width:{{ (threat_safe * 100 / _tt3)|round(1) }}%;"></div></div>
+                  <span class="anlx-risk-val">{{ (threat_safe * 100 / _tt3)|round(0)|int }}%</span>
+                </div>
+                <div class="anlx-risk-row">
+                  <span class="anlx-risk-name color-yellow">Suspicious</span>
+                  <div class="bar-track" style="flex:1;"><div class="bar-fill-yellow" style="width:{{ (threat_suspicious * 100 / _tt3)|round(1) }}%;"></div></div>
+                  <span class="anlx-risk-val">{{ (threat_suspicious * 100 / _tt3)|round(0)|int }}%</span>
+                </div>
+                <div class="anlx-risk-row">
+                  <span class="anlx-risk-name color-red">Threat</span>
+                  <div class="bar-track" style="flex:1;"><div class="bar-fill-red" style="width:{{ (threat_threat * 100 / _tt3)|round(1) }}%;"></div></div>
+                  <span class="anlx-risk-val">{{ (threat_threat * 100 / _tt3)|round(0)|int }}%</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── Row 2: Top Attacking IPs + Most Targeted Services ── -->
+          <div class="anlx-row anlx-row-equal" style="margin-top:14px;">
+
+            <!-- Panel 3 – Top Attacking IPs -->
+            <div class="panel anlx-panel">
+              <div class="panel-title">
+                <i class="fa-solid fa-globe anlx-panel-icon color-red" aria-hidden="true"></i>
+                Top Attacking IPs
+              </div>
+              {% if top_attacking_ips|length > 0 %}
+                {% set _max_ip2 = namespace(v=1) %}
+                {% for a in top_attacking_ips %}{% if a.attempt_count > _max_ip2.v %}{% set _max_ip2.v = a.attempt_count %}{% endif %}{% endfor %}
+                <div class="anlx-ip-list">
+                  {% for attacker in top_attacking_ips %}
+                    <div class="anlx-ip-row">
+                      <div class="anlx-ip-rank">{{ loop.index }}</div>
+                      <div class="anlx-ip-body">
+                        <div class="anlx-ip-top">
+                          <a class="ip-link fw-bold" href="/dashboard/ip/{{ attacker.ip|urlencode }}" title="Investigate">{{ attacker.ip }}</a>
+                          <span class="anlx-ip-count color-red fw-bold">{{ attacker.attempt_count }}</span>
+                        </div>
+                        <div class="anlx-ip-bar-wrap">
+                          <div class="bar-track" style="height:4px;flex:1;">
+                            <div class="bar-fill-red" style="width:{{ (attacker.attempt_count * 100 / _max_ip2.v)|round(1) }}%;"></div>
+                          </div>
+                          <span class="anlx-ip-pct color-muted">{{ (attacker.attempt_count * 100 / _max_ip2.v)|round(0)|int }}%</span>
+                        </div>
+                      </div>
                     </div>
                   {% endfor %}
                 </div>
               {% else %}
-                <div class="muted" style="font-size: 12px;">No data in the last 24h.</div>
+                <div class="anlx-empty">
+                  <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                  <span>No attacking IPs detected.</span>
+                </div>
               {% endif %}
             </div>
 
-            <!-- A2: Top targeted usernames -->
-            <div style="margin-bottom: 14px; padding: 10px; background: rgba(251,191,36,0.08); border-radius: 12px; border: 1px solid rgba(251,191,36,0.20);">
-              <div style="color: #fbbf24; font-size: 11px; font-weight: 900; margin-bottom: 6px;">🎯 TOP TARGETED USERNAMES</div>
-              {% if top_targeted_usernames|length > 0 %}
-                <div style="display: grid; gap: 6px; font-size: 12px;">
-                  {% for u in top_targeted_usernames[:5] %}
-                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(251,191,36,0.20); border-radius: 8px;">
-                      <span style="font-family: monospace; color: #93c5fd; font-weight: 900;">{{ u.username }}</span>
-                      <span style="color: #fbbf24; font-weight: 900;">{{ u.attempts }} attempts</span>
-                      <span style="color: #f87171; font-weight: 500;">{{ u.failed }} failed</span>
+            <!-- Panel 4 – Most Targeted Services -->
+            <div class="panel anlx-panel">
+              <div class="panel-title">
+                <i class="fa-solid fa-server anlx-panel-icon color-yellow" aria-hidden="true"></i>
+                Most Targeted Services
+              </div>
+              {% if service_activity_distribution|length > 0 %}
+                {% set _max_svc3 = namespace(v=1) %}
+                {% for s in service_activity_distribution %}{% if s.attempt_count > _max_svc3.v %}{% set _max_svc3.v = s.attempt_count %}{% endif %}{% endfor %}
+                <div class="anlx-svc-list">
+                  {% for s in service_activity_distribution %}
+                    {% set _s_failed = namespace(v=0) %}
+                    {% set _s_thr    = namespace(v=0) %}
+                    {% for f in failed_attempts_by_service %}{% if f.service_route == s.service_route %}{% set _s_failed.v = f.failed_count %}{% endif %}{% endfor %}
+                    {% for t in threat_counts_by_service %}{% if t.service_route == s.service_route %}{% set _s_thr.v = t.threat_count %}{% endif %}{% endfor %}
+                    <div class="anlx-svc-row">
+                      <div class="anlx-svc-icon
+                        {% if 'ssh' in s.service_route|lower %}anlx-svc-blue
+                        {% elif 'database' in s.service_route|lower or 'db' in s.service_route|lower %}anlx-svc-yellow
+                        {% elif 'api' in s.service_route|lower %}anlx-svc-green
+                        {% else %}anlx-svc-red{% endif %}" aria-hidden="true">
+                        {% if 'ssh' in s.service_route|lower %}<i class="fa-solid fa-terminal"></i>
+                        {% elif 'database' in s.service_route|lower or 'db' in s.service_route|lower %}<i class="fa-solid fa-database"></i>
+                        {% elif 'api' in s.service_route|lower %}<i class="fa-solid fa-code"></i>
+                        {% else %}<i class="fa-solid fa-globe"></i>{% endif %}
+                      </div>
+                      <div class="anlx-svc-body">
+                        <div class="anlx-svc-top">
+                          <span class="mono color-blue fw-bold" style="font-size:12px;">{{ s.service_route }}</span>
+                          <div class="anlx-svc-chips">
+                            <span class="anlx-chip">{{ s.attempt_count }} hits</span>
+                            <span class="anlx-chip anlx-chip-red">{{ _s_failed.v }} fail</span>
+                            {% if _s_thr.v > 0 %}<span class="anlx-chip anlx-chip-yellow">{{ _s_thr.v }} threats</span>{% endif %}
+                          </div>
+                        </div>
+                        <div class="bar-track" style="height:4px;margin-top:5px;">
+                          <div class="bar-fill-blue" style="width:{{ (s.attempt_count * 100 / _max_svc3.v)|round(1) }}%;"></div>
+                        </div>
+                      </div>
                     </div>
                   {% endfor %}
                 </div>
               {% else %}
-                <div class="muted" style="font-size: 12px;">No data yet.</div>
+                <div class="anlx-empty">
+                  <i class="fa-solid fa-server" aria-hidden="true"></i>
+                  <span>No service data recorded yet.</span>
+                </div>
               {% endif %}
             </div>
 
-            <!-- A3: Failure reason distribution -->
-            <div style="margin-bottom: 14px; padding: 10px; background: rgba(248,113,113,0.08); border-radius: 12px; border: 1px solid rgba(248,113,113,0.20);">
-              <div style="color: #f87171; font-size: 11px; font-weight: 900; margin-bottom: 6px;">⚠️ FAILURE REASONS</div>
+          </div>
+
+          <!-- ── Row 3: Threat Severity + Failure Reasons ──── -->
+          <div class="anlx-row anlx-row-equal" style="margin-top:14px;">
+
+            <!-- Panel 5 – Threat Severity Distribution -->
+            <div class="panel anlx-panel">
+              <div class="panel-title">
+                <i class="fa-solid fa-triangle-exclamation anlx-panel-icon color-yellow" aria-hidden="true"></i>
+                Threat Severity Distribution
+              </div>
+
+              {% set _tt4 = (threat_safe + threat_suspicious + threat_threat) or 1 %}
+              <!-- Stacked bar -->
+              <div class="anlx-stacked-bar-wrap">
+                <div class="anlx-stacked-bar">
+                  {% if threat_safe > 0 %}<div class="anlx-stacked-seg anlx-seg-green" style="flex:{{ threat_safe }};" title="Safe: {{ threat_safe }}"></div>{% endif %}
+                  {% if threat_suspicious > 0 %}<div class="anlx-stacked-seg anlx-seg-yellow" style="flex:{{ threat_suspicious }};" title="Suspicious: {{ threat_suspicious }}"></div>{% endif %}
+                  {% if threat_threat > 0 %}<div class="anlx-stacked-seg anlx-seg-red" style="flex:{{ threat_threat }};" title="Threat: {{ threat_threat }}"></div>{% endif %}
+                </div>
+                <div class="anlx-stacked-legend">
+                  <span><span class="anlx-legend-dot" style="background:var(--color-green);"></span>Safe</span>
+                  <span><span class="anlx-legend-dot" style="background:var(--color-yellow);"></span>Suspicious</span>
+                  <span><span class="anlx-legend-dot" style="background:var(--color-red);"></span>Threat</span>
+                </div>
+              </div>
+
+              <!-- Large stat tiles -->
+              <div class="anlx-sev-tiles">
+                <div class="anlx-sev-tile anlx-sev-green">
+                  <div class="anlx-sev-value">{{ threat_safe }}</div>
+                  <div class="anlx-sev-label">Safe</div>
+                  <div class="anlx-sev-pct">{{ (threat_safe * 100 / _tt4)|round(0)|int }}%</div>
+                </div>
+                <div class="anlx-sev-tile anlx-sev-yellow">
+                  <div class="anlx-sev-value">{{ threat_suspicious }}</div>
+                  <div class="anlx-sev-label">Suspicious</div>
+                  <div class="anlx-sev-pct">{{ (threat_suspicious * 100 / _tt4)|round(0)|int }}%</div>
+                </div>
+                <div class="anlx-sev-tile anlx-sev-red">
+                  <div class="anlx-sev-value">{{ threat_threat }}</div>
+                  <div class="anlx-sev-label">Threat</div>
+                  <div class="anlx-sev-pct">{{ (threat_threat * 100 / _tt4)|round(0)|int }}%</div>
+                </div>
+              </div>
+
+              <!-- Severity breakdown (from alert severity dict) -->
+              {% if severity_distribution %}
+                <div class="anlx-sev-breakdown">
+                  <div class="anlx-sev-breakdown-label">Alert Severity Breakdown</div>
+                  {% for sev, count in severity_distribution.items() %}
+                    <div class="anlx-sev-breakdown-row">
+                      <span class="pill pill-{% if sev|lower == 'critical' or sev|lower == 'high' %}danger{% elif sev|lower == 'medium' %}warn{% else %}okay{% endif %}" style="font-size:10px;min-width:70px;text-align:center;">{{ sev }}</span>
+                      <div class="bar-track" style="flex:1;"><div class="bar-fill-{% if sev|lower == 'critical' or sev|lower == 'high' %}red{% elif sev|lower == 'medium' %}yellow{% else %}green{% endif %}" style="width:100%;opacity:0.6;"></div></div>
+                      <span class="fw-bold" style="min-width:28px;text-align:right;">{{ count }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <!-- Blocked IPs widget -->
+              <div class="anlx-blocked-widget">
+                <div class="anlx-blocked-icon" aria-hidden="true"><i class="fa-solid fa-ban"></i></div>
+                <div>
+                  <div class="anlx-blocked-count color-red">{{ blocked_ip_count }}</div>
+                  <div class="anlx-blocked-label">IPs currently blocked</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 6 – Failure Reason Analysis -->
+            <div class="panel anlx-panel">
+              <div class="panel-title">
+                <i class="fa-solid fa-circle-xmark anlx-panel-icon color-red" aria-hidden="true"></i>
+                Failure Reason Analysis
+              </div>
               {% if failure_reason_distribution|length > 0 %}
-                {% set _max_reason_n = 1 %}
-                {% for r in failure_reason_distribution %}
-                  {% if r.n > _max_reason_n %}{% set _max_reason_n = r.n %}{% endif %}
-                {% endfor %}
-                <div style="display: grid; gap: 6px; font-size: 12px;">
+                {% set _max_fr = namespace(v=1) %}
+                {% for r in failure_reason_distribution %}{% if r.n > _max_fr.v %}{% set _max_fr.v = r.n %}{% endif %}{% endfor %}
+                {% set _total_fr = namespace(v=0) %}
+                {% for r in failure_reason_distribution %}{% set _total_fr.v = _total_fr.v + r.n %}{% endfor %}
+                <div class="anlx-fr-list">
                   {% for r in failure_reason_distribution %}
-                    <div style="display: grid; grid-template-columns: 200px 1fr 60px; gap: 8px; align-items: center;">
-                      <span style="color: #93c5fd; font-family: monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.reason }}">{{ r.reason }}</span>
-                      <div style="background: rgba(0,0,0,0.25); border-radius: 6px; height: 10px; position: relative; overflow: hidden;">
-                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ (r.n * 100 / _max_reason_n)|round(1) }}%; background: linear-gradient(90deg, rgba(248,113,113,0.85), rgba(251,191,36,0.65));"></div>
+                    <div class="anlx-fr-row">
+                      <div class="anlx-fr-top">
+                        <span class="anlx-fr-label mono color-blue" title="{{ r.reason }}">{{ r.reason }}</span>
+                        <div class="anlx-fr-badges">
+                          <span class="fw-bold color-red">{{ r.n }}</span>
+                          <span class="color-muted" style="font-size:11px;">{{ (r.n * 100 / _total_fr.v)|round(0)|int }}%</span>
+                        </div>
                       </div>
-                      <span style="color: #f87171; font-weight: 900; text-align: right;">{{ r.n }}</span>
+                      <div class="bar-track" style="height:6px;">
+                        <div class="bar-fill-gradient" style="width:{{ (r.n * 100 / _max_fr.v)|round(1) }}%;"></div>
+                      </div>
                     </div>
                   {% endfor %}
                 </div>
+                <div class="anlx-fr-summary">
+                  <span class="color-muted" style="font-size:11px;">{{ failure_reason_distribution|length }} distinct failure reasons · {{ _total_fr.v }} total events</span>
+                </div>
               {% else %}
-                <div class="muted" style="font-size: 12px;">No data yet.</div>
+                <div class="anlx-empty">
+                  <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                  <span>No failure reason data yet.</span>
+                </div>
+              {% endif %}
+
+              <!-- Top targeted usernames embedded as secondary panel -->
+              {% if top_targeted_usernames|length > 0 %}
+                <div class="anlx-username-section">
+                  <div class="anlx-username-label">
+                    <i class="fa-solid fa-user-secret" aria-hidden="true"></i>
+                    Top Targeted Usernames
+                  </div>
+                  {% set _max_uname = namespace(v=1) %}
+                  {% for u in top_targeted_usernames %}{% if u.attempts > _max_uname.v %}{% set _max_uname.v = u.attempts %}{% endif %}{% endfor %}
+                  {% for u in top_targeted_usernames[:7] %}
+                    <div class="anlx-username-row">
+                      <span class="anlx-uname-rank color-muted">{{ loop.index }}</span>
+                      <span class="mono color-blue fw-bold anlx-uname-val">{{ u.username }}</span>
+                      <div class="bar-track" style="flex:1;height:4px;"><div class="bar-fill-blue" style="width:{{ (u.attempts * 100 / _max_uname.v)|round(1) }}%;"></div></div>
+                      <span class="color-muted" style="font-size:11px;min-width:48px;text-align:right;">{{ u.attempts }} / <span class="color-red">{{ u.failed }}</span></span>
+                    </div>
+                  {% endfor %}
+                </div>
               {% endif %}
             </div>
-          </section>
-        </section>
 
+          </div>
 
-        <div class="footer">
-          Smart Honeypot IDS • Flask + SQLite + Scikit-learn • AI-Enhanced Security Monitoring
+          <!-- ── Row 4: AI Security Recommendations (full-width) ── -->
+          <div style="margin-top:14px;">
+            <div class="panel anlx-panel">
+              <div class="panel-title">
+                <i class="fa-solid fa-lightbulb anlx-panel-icon color-blue" aria-hidden="true"></i>
+                AI Security Recommendations
+              </div>
+              <div class="anlx-rec-grid">
 
-          <br />
-          <span style="font-size: 11px; margin-top: 4px; display: inline-block;">Last updated: {{ now }}</span>
-        </div>
+                <!-- Rec 1: Brute-force posture -->
+                <div class="anlx-rec-card {% if failed_logins >= 10 %}anlx-rec-critical{% elif failed_logins >= 5 %}anlx-rec-warn{% else %}anlx-rec-ok{% endif %}">
+                  <div class="anlx-rec-header">
+                    <div class="anlx-rec-icon" aria-hidden="true">
+                      {% if failed_logins >= 5 %}<i class="fa-solid fa-shield-halved"></i>{% else %}<i class="fa-solid fa-circle-check"></i>{% endif %}
+                    </div>
+                    <div class="anlx-rec-title">Brute-Force Posture</div>
+                    <div class="anlx-rec-badge {% if failed_logins >= 10 %}anlx-rbadge-critical{% elif failed_logins >= 5 %}anlx-rbadge-warn{% else %}anlx-rbadge-ok{% endif %}">
+                      {% if failed_logins >= 10 %}ACTION REQUIRED{% elif failed_logins >= 5 %}ELEVATED{% else %}NOMINAL{% endif %}
+                    </div>
+                  </div>
+                  <div class="anlx-rec-body">
+                    {% if failed_logins >= 10 %}
+                      {{ failed_logins }} failed authentications detected. Consider tightening rate-limiting thresholds and enforcing CAPTCHA or MFA on all exposed services.
+                    {% elif failed_logins >= 5 %}
+                      {{ failed_logins }} failed logins recorded. Monitor for credential-stuffing patterns. Ensure lockout policies are active.
+                    {% else %}
+                      Failed login activity is within acceptable thresholds ({{ failed_logins }} events). Continue monitoring.
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Rec 2: IP blocking posture -->
+                <div class="anlx-rec-card {% if blocked_ip_count >= 5 %}anlx-rec-critical{% elif blocked_ip_count > 0 %}anlx-rec-warn{% else %}anlx-rec-ok{% endif %}">
+                  <div class="anlx-rec-header">
+                    <div class="anlx-rec-icon" aria-hidden="true">
+                      <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <div class="anlx-rec-title">IP Blocking Status</div>
+                    <div class="anlx-rec-badge {% if blocked_ip_count >= 5 %}anlx-rbadge-critical{% elif blocked_ip_count > 0 %}anlx-rbadge-warn{% else %}anlx-rbadge-ok{% endif %}">
+                      {% if blocked_ip_count >= 5 %}HIGH VOLUME{% elif blocked_ip_count > 0 %}ACTIVE BLOCKS{% else %}CLEAR{% endif %}
+                    </div>
+                  </div>
+                  <div class="anlx-rec-body">
+                    {% if blocked_ip_count >= 5 %}
+                      {{ blocked_ip_count }} IPs currently blocked. High blocking volume may indicate an active attack campaign. Review block list and consider adding persistent firewall rules.
+                    {% elif blocked_ip_count > 0 %}
+                      {{ blocked_ip_count }} IP{% if blocked_ip_count > 1 %}s{% endif %} currently rate-limited. Review regularly to confirm legitimacy before unblocking.
+                    {% else %}
+                      No IPs currently blocked. Rate-limiter is active and no thresholds have been exceeded.
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Rec 3: Service exposure -->
+                <div class="anlx-rec-card {% if service_activity_distribution|length >= 4 %}anlx-rec-warn{% else %}anlx-rec-ok{% endif %}">
+                  <div class="anlx-rec-header">
+                    <div class="anlx-rec-icon" aria-hidden="true">
+                      <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div class="anlx-rec-title">Service Exposure</div>
+                    <div class="anlx-rec-badge {% if service_activity_distribution|length >= 4 %}anlx-rbadge-warn{% else %}anlx-rbadge-ok{% endif %}">
+                      {{ service_activity_distribution|length }} SERVICES
+                    </div>
+                  </div>
+                  <div class="anlx-rec-body">
+                    {% if service_activity_distribution|length >= 4 %}
+                      {{ service_activity_distribution|length }} honeypot services are receiving traffic. Verify that no production services are exposed on the same network segment.
+                    {% else %}
+                      {{ service_activity_distribution|length }} active service{% if service_activity_distribution|length != 1 %}s{% endif %} receiving traffic. Exposure level is within expected range.
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Rec 4: Overall threat posture -->
+                <div class="anlx-rec-card {% if ai_threat_level == 'Critical' %}anlx-rec-critical{% elif ai_threat_level == 'High' %}anlx-rec-critical{% elif ai_threat_level == 'Medium' %}anlx-rec-warn{% else %}anlx-rec-ok{% endif %}">
+                  <div class="anlx-rec-header">
+                    <div class="anlx-rec-icon" aria-hidden="true">
+                      <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div class="anlx-rec-title">AI Threat Posture</div>
+                    <div class="anlx-rec-badge {% if ai_threat_level == 'Critical' or ai_threat_level == 'High' %}anlx-rbadge-critical{% elif ai_threat_level == 'Medium' %}anlx-rbadge-warn{% else %}anlx-rbadge-ok{% endif %}">
+                      {% if ai_threat_level == 'Critical' %}CRITICAL{% elif ai_threat_level == 'High' %}HIGH{% elif ai_threat_level == 'Medium' %}MEDIUM{% else %}LOW{% endif %}
+                    </div>
+                  </div>
+                  <div class="anlx-rec-body">
+                    {% if ai_threat_level == 'Critical' %}
+                      AI classification indicates CRITICAL threat activity ({{ threat_alerts }} alerts). Escalate to security team immediately. Verify whether attacks have reached production infrastructure.
+                    {% elif ai_threat_level == 'High' %}
+                      Elevated threat activity detected. {{ suspicious_ips }} suspicious IP{% if suspicious_ips != 1 %}s{% endif %} observed. Increase monitoring frequency and review ingress firewall rules.
+                    {% elif ai_threat_level == 'Medium' %}
+                      Medium-level threat activity. Continue monitoring and ensure alert thresholds are appropriately tuned.
+                    {% else %}
+                      AI assessment shows LOW threat activity. All systems within expected operational baseline. Continue passive monitoring.
+                    {% endif %}
+                  </div>
+                </div>
+
+              </div><!-- /anlx-rec-grid -->
+            </div>
+          </div>
+
+        </div><!-- /view-analytics -->
+
       </main>
     </div>
 
+    <!-- ── JavaScript ───────────────────────────────────────── -->
     <script>
-      // Auto-refresh dashboard every 30 seconds
-      setInterval(function() {
-        location.reload();
-      }, 30000);
+    (function () {
+      'use strict';
+
+      /* ── View / Tab switching ─────────────────────────────── */
+      var VIEW_KEY   = 'ids_view';
+      var navLinks   = document.querySelectorAll('.nav-link');
+      var pageViews  = document.querySelectorAll('.page-view');
+
+      var pageMeta = {
+        dashboard : { title: 'Smart Honeypot IDS',    sub: 'Security Operations Center' },
+        services  : { title: 'Honeypot Services',     sub: 'Monitored deception endpoints' },
+        logs      : { title: 'Attack Logs',           sub: 'Complete attack event log' },
+        reports   : { title: 'Reports',               sub: 'Security reports and data exports' },
+        analytics : { title: 'Analytics',             sub: 'Security intelligence and trend analysis' }
+      };
+
+      function switchView(target) {
+        pageViews.forEach(function (v) { v.classList.remove('active'); });
+        navLinks.forEach(function (a) { a.classList.remove('active'); a.removeAttribute('aria-current'); });
+
+        var view = document.getElementById('view-' + target);
+        if (view) { view.classList.add('active'); }
+
+        navLinks.forEach(function (a) {
+          if (a.dataset.view === target) {
+            a.classList.add('active');
+            a.setAttribute('aria-current', 'page');
+          }
+        });
+
+        var meta = pageMeta[target] || pageMeta.dashboard;
+        var titleEl = document.getElementById('page-title');
+        var subEl   = document.getElementById('page-subtitle');
+        if (titleEl) titleEl.textContent = meta.title;
+        if (subEl)   subEl.textContent   = meta.sub;
+
+        sessionStorage.setItem(VIEW_KEY, target);
+        window.scrollTo(0, 0);
+      }
+
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          switchView(link.dataset.view);
+        });
+      });
+
+      // Restore saved view
+      var savedView = sessionStorage.getItem(VIEW_KEY) || 'dashboard';
+      switchView(savedView);
+
+      /* ── Dashboard table search + filter ─────────────────── */
+      function makeTableFilter(searchId, tbodyId, noResultsId, filterClass, statusClass) {
+        var searchInput = document.getElementById(searchId);
+        var tbody       = document.getElementById(tbodyId);
+        var noResults   = document.getElementById(noResultsId);
+        var activeFilter = 'all';
+        var activeStatus = 'all';
+        var searchTerm   = '';
+
+        function apply() {
+          if (!tbody) return;
+          var rows    = tbody.querySelectorAll('tr:not(.no-data-row)');
+          var visible = 0;
+          rows.forEach(function (tr) {
+            var u  = (tr.dataset.username || '').toLowerCase();
+            var ip = (tr.dataset.ip       || '').toLowerCase();
+            var sv = (tr.dataset.service  || '').toLowerCase();
+            var st = (tr.dataset.status   || '').toLowerCase();
+
+            var mSearch = !searchTerm ||
+              u.indexOf(searchTerm) !== -1 ||
+              ip.indexOf(searchTerm) !== -1 ||
+              sv.indexOf(searchTerm) !== -1;
+            var mFilter = activeFilter === 'all' || sv.indexOf(activeFilter) !== -1;
+            var mStatus = activeStatus === 'all' || st === activeStatus;
+
+            if (mSearch && mFilter && mStatus) { tr.style.display = ''; visible++; }
+            else { tr.style.display = 'none'; }
+          });
+          if (noResults) noResults.style.display = (visible === 0 && rows.length > 0) ? 'block' : 'none';
+        }
+
+        if (searchInput) {
+          var SKEY = 'ids_' + searchId;
+          var saved = sessionStorage.getItem(SKEY);
+          if (saved) { searchInput.value = saved; searchTerm = saved.toLowerCase(); }
+          searchInput.addEventListener('input', function () {
+            searchTerm = this.value.trim().toLowerCase();
+            sessionStorage.setItem(SKEY, this.value.trim());
+            apply();
+          });
+        }
+
+        if (filterClass) {
+          document.querySelectorAll('.' + filterClass).forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              document.querySelectorAll('.' + filterClass).forEach(function (b) { b.classList.remove('active'); });
+              btn.classList.add('active');
+              activeFilter = btn.dataset.filter;
+              apply();
+            });
+          });
+        }
+
+        if (statusClass) {
+          document.querySelectorAll('.' + statusClass).forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              document.querySelectorAll('.' + statusClass).forEach(function (b) { b.classList.remove('active'); });
+              btn.classList.add('active');
+              activeStatus = btn.dataset.status;
+              apply();
+            });
+          });
+        }
+
+        apply();
+        return apply;
+      }
+
+      // Dashboard quick-search (reuses filter-btn class, scoped by search input ID)
+      (function () {
+        var searchInput  = document.getElementById('dash-search');
+        var tbody        = document.getElementById('dash-tbody');
+        var noResults    = document.getElementById('dash-no-results');
+        var filterBtns   = document.querySelectorAll('#view-dashboard .filter-btn');
+        var activeFilter = 'all';
+        var searchTerm   = '';
+
+        function apply() {
+          if (!tbody) return;
+          var rows = tbody.querySelectorAll('tr:not(.no-data-row)');
+          var vis  = 0;
+          rows.forEach(function (tr) {
+            var u  = (tr.dataset.username || '').toLowerCase();
+            var ip = (tr.dataset.ip       || '').toLowerCase();
+            var sv = (tr.dataset.service  || '').toLowerCase();
+            var mS = !searchTerm || u.indexOf(searchTerm) !== -1 || ip.indexOf(searchTerm) !== -1;
+            var mF = activeFilter === 'all' || sv.indexOf(activeFilter) !== -1;
+            if (mS && mF) { tr.style.display = ''; vis++; }
+            else { tr.style.display = 'none'; }
+          });
+          if (noResults) noResults.style.display = (vis === 0 && rows.length > 0) ? 'block' : 'none';
+        }
+
+        if (searchInput) {
+          var sv2 = sessionStorage.getItem('ids_dash_search');
+          if (sv2) { searchInput.value = sv2; searchTerm = sv2.toLowerCase(); }
+          searchInput.addEventListener('input', function () {
+            searchTerm = this.value.trim().toLowerCase();
+            sessionStorage.setItem('ids_dash_search', this.value.trim());
+            apply();
+          });
+        }
+
+        filterBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            filterBtns.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            apply();
+          });
+        });
+
+        apply();
+      })();
+
+      // Attack Logs full filter
+      makeTableFilter('logs-search', 'logs-tbody', 'logs-no-results', 'logs-filter-btn', 'logs-status-btn');
+
+      /* ── Auto-refresh every 30 seconds ───────────────────── */
+      setInterval(function () { location.reload(); }, 30000);
+
+    })();
     </script>
   </body>
 </html>
-
