@@ -4,7 +4,7 @@ import os
 from PyInstaller.utils.hooks import collect_submodules
 
 # Project paths
-PROJECT_ROOT = r"C:\Temp\Smart_Honeypot_IDS"
+PROJECT_ROOT = r"C:\AI-Based-Smart-Honeypot-IDS\Smart_Honeypot_IDS"
 APP_DIR = os.path.join(PROJECT_ROOT, "app")
 
 # Hidden imports
